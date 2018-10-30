@@ -99,3 +99,65 @@ def intermod_table(signals, order):
     T.reset_index(drop=True, inplace=True)
 
     return (T)
+
+
+def harmonic_toi(frqs, order, band_of_interest=[]):
+    """Calculates the harmonic table of interest for given frequencies.
+
+    Will calculate the harmonics of the given frequencies and highlight
+    which ones fall within the given band of interest.
+
+    :param frqs: list of frequencies
+    :param order: largest order of harmonic
+    :param band_of_interest: tuple containing the lower and upper values of the band of interest
+    :type frqs: float
+    :type order: integer
+    :type band_of_interest: tuple(float)
+    :Example:
+
+    >>> import intermod_library.intermod_tools as it
+    >>> frqs = [1000]
+    >>> order = 5
+    >>> band_of_interest = [2500, 3500]
+    >>> table = it.harmonic_toi(frqs, order, band_of_interest)
+    >>> table
+
+    =========== =========
+    <index>     Signal 1
+    =========== =========
+    Harmonic #0   1000.0
+    Harmonic #1   2000.0
+    Harmonic #2 **3000.0
+    Harmonic #3   4000.0
+    Harmonic #4   5000.0
+    =========== =========
+    """
+
+    if (len(band_of_interest) == 0) | (len(band_of_interest) == 1) :
+        lower = 1.0
+        upper = -1.0
+    else:
+        lower = band_of_interest[0]
+        upper = band_of_interest[1]
+
+    n = np.size(frqs)
+    m = order
+    table = np.zeros((m, n))
+
+    for i in np.arange(n):
+        table[0, i] = frqs[i]
+        table[1:, i] = [frqs[i]*x for x in np.arange(2, order+1)]
+
+    index = ["Harmonic #" + str(x) for x in range(1, order+1)]
+    header = ["Signal " + str(x) for x in range(1, n+1)]
+
+    T = pd.DataFrame(table, columns=header, index=index)
+
+    for i in np.arange(T.shape[0]):
+        for j in np.arange(T.shape[1]):
+            if (T.iloc[i, j] >= lower and T.iloc[i, j] <= upper):
+                T.iloc[i, j] = "**" + str(T.iloc[i, j])
+            else:
+                T.iloc[i, j] = str(T.iloc[i, j])
+
+    return T
