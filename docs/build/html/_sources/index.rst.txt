@@ -8,7 +8,9 @@ Welcome to Intermod Library's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   
+   quickstart
+   modules
 
 
 
@@ -19,4 +21,3 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. autofunction:: intermod_library.intermod_tools.intermod_table
