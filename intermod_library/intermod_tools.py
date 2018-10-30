@@ -2,7 +2,7 @@
 """
 Intermod Tools
 
-@author: wboxx
+@author: William Boxx
 """
 
 
