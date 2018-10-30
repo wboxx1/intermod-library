@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Will Boxx",
     author_email="wboxx1@gmail.com",
-    description="A library of tools for finding and viewing intermodulation signals and harmonics",
+    description="A library of tools for finding and viewing intermodulation prducts and harmonics",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/wboxx1/intermod-library",

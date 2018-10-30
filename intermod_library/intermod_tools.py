@@ -8,53 +8,39 @@ Intermod Tools
 
 import numpy as np
 import pandas as pd
-
-
-def simple_fft(signal, scan_rate):
-    """perform an Fast Fourier Transform of a real-valued input signal
-    
-    perform an FFT of a real-valued input signal, and generate the output
-    in amplitude and phase, scaled to the same units as the input.
-    
-    :param signal: the time series signal to transform
-    :param scan_rate: the sampling frequency (in Hertz)
-    :type signal: list[float]
-    :type scan_rate: float
-    :returns: frequency, amplitude, and phase vectors
-    :rtype: tuple(list[float], list[float], list[float])
-    :returns frq: a vector of frequency points (in Hertz)
-    :returns amp: a vector of amplitudes (same units as the input signal)
-    :returns phase: a vector of phases (in radians)
-    :Example:
-
-
-    """
-
-    L = np.size(signal)
-    NFFT = 2**np.ceil(np.log2(L))
-
-    z = np.fft.fft(signal, n=int(NFFT)) / L
-
-    deltaf = 1 / (NFFT / ScanRate)
-
-    frq = np.arange(-NFFT / 2, NFFT / 2) * deltaf
-
-    amp = np.squeeze(np.abs(np.fft.fftshift(z)))
-
-    amp = amp / np.max(amp)
-
-    phase = np.angle(np.fft.fftshift(z))
-
-    return frq, amp, phase
-
+import helpers.helper_functions
 
 def intermod_table(signals, order):
-"""Calculates intermods from the given signals to the specified order
+    """Calculates intermodulation products between the given signals to the specified order
 
-"""
-#    signals = [0.25,7.6,9.2,12]
-#    order = 3  # Number of harmonics
-#    order = 3  # Number of harmonics
+    Will calculate all intermodulation products that could be potentially
+    created between the given signals.  Must specify the highest order of
+    intermods.
+
+    :param signals: list of signals to calculate intermod products on
+    :param order: highest order of intermod products to calculate
+    :type signals: list[float]
+    :type order: integer
+    :returns: pandas dataframe containing the calculated intermod products
+    :Example:
+
+    >>> import intermod_library.intermod_tools as it
+    >>> signals = [1000, 2000]
+    >>> order = 3
+    >>> table = it.intermod_table(signals, order)
+    >>> table.head()
+
+    ========= ========= ========= ========= =========
+    <index>   Frequency Signal 1  Signal 2  Order
+    ========= ========= ========= ========= =========
+    0         1000.0    1.0       0.0       1.0
+    1         1000.0    -1.0      1.0       2.0
+    2         2000.0    0.0       1.0       1.0
+    3         2000.0    2.0       0.0       2.0
+    4         3000.0    1.0       1.0       2.0
+    ========= ========= ========= ========= =========
+    """
+
     M = np.size(signals)   # Number of signals
     N = order + 1
 
@@ -92,24 +78,12 @@ def intermod_table(signals, order):
     for i in range(1, int(j / 2**M)):
         signmat = np.vstack([signmat, firstblock])
 
-    # np.tile(signmat, (int(j/ 2**M))
-
     finalmat = coefmat * signmat
 
-    intermods = abs(np.dot(finalmat, signals))
-
-    Order = np.sort(np.sum(abs(finalmat), 1))
-    ind = np.argsort(np.sum(abs(finalmat), 1))
-
-    finalmat = finalmat[ind]
-    intermods = intermods[ind]
-    intermods, ia = np.unique(intermods, return_index=True)
-    Signs = finalmat[ia] + 0
-    Order = Order[ia]
-    final = np.column_stack((intermods, Signs, Order))
-    mask = final[:, -1] < N
-    final = final[mask]
-
+    intermods = np.dot(finalmat, signals)
+    intermod_order = np.sum(abs(finalmat), 1)
+    final = np.column_stack((intermods, finalmat, intermod_order))
+    
     header = ['Frequency']
     for i in np.arange(M):
         header = header + ['Signal ' + str(i+1)]
@@ -118,4 +92,10 @@ def intermod_table(signals, order):
 
     T = pd.DataFrame(final, columns=header)
 
-    return (T[T.Order > 1])
+    T.query('Frequency > 0', inplace=True)
+    T.query('(Order > 0) & (Order <= @order)', inplace=True)
+    T.drop_duplicates(inplace=True)
+    T.sort_values(by=['Frequency'], inplace=True)
+    T.reset_index(drop=True, inplace=True)
+
+    return (T)
