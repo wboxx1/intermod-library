@@ -113,6 +113,7 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
     :type frqs: float
     :type order: integer
     :type band_of_interest: tuple(float)
+    :returns: pandas dataframe that lists harmonics and emphasizes those in boi with **
     :Example:
 
     >>> import intermod_library.intermod_tools as it
