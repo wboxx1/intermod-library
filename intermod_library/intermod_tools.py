@@ -127,7 +127,7 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
     =========== =========
     Harmonic #0   1000.0
     Harmonic #1   2000.0
-    Harmonic #2 **3000.0
+    Harmonic #2 \**3000.0
     Harmonic #3   4000.0
     Harmonic #4   5000.0
     =========== =========
