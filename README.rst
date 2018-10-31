@@ -11,12 +11,12 @@ https://github.com/wboxx1/intermod-library
 Documentation can be found at:
 https://wboxx1.github.io/intermod-library/docs/build/html/index.html
 
-Example usage:
+Installation:
 --------------
 
-You must first import the modules from the package.
+Pip:
 
-.. code-block:: python
+.. code-block:: pypi
 
-    import intermod_library.intermod_tools as it
+    pip install intermod-library
 
