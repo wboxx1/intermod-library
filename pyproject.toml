@@ -10,6 +10,10 @@ readme = "README.rst"
 repository = "https://github.com/wboxx1/intermod-library"
 homepage = "https://wboxx1.github.io/intermod-library/build/html/index.html"
 
+packages = [
+    { include = "intermod_library", from = "src"},
+]
+
 [tool.poetry.dependencies]
 python = "^3.6"
 numpy = "^1.15"
