@@ -9,7 +9,7 @@ Source can be found at:
 https://github.com/wboxx1/intermod-library
 
 Documentation can be found at:
-https://wboxx1.github.io/intermod-library/docs/build/html/index.html
+https://wboxx1.github.io/intermod-library
 
 Installation:
 --------------
