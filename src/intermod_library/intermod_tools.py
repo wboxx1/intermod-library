@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """
 Intermod Tools
 
@@ -102,7 +103,7 @@ def intermod_table(signals, order):
 
 
 def harmonic_toi(frqs, order, band_of_interest=[]):
-    """Calculates the harmonic table of interest for given frequencies.
+    r"""Calculates the harmonic table of interest for given frequencies.
 
     Will calculate the harmonics of the given frequencies and highlight
     which ones fall within the given band of interest.
