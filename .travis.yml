@@ -12,7 +12,7 @@ env:
 
 
 # Command to install unit testers and package managers
-before-install: 
+before_install: 
 - curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 - pip install -U tox-travis
 
@@ -22,7 +22,7 @@ install: poetry install
 # Command to run tests, e.g. python setup.py test
 script: tox
 
-before-deploy:
+before_deploy:
 - poetry config http-basic.mypypi $MYPYPI_USER $MYPYPI_PASS
 - poetry build -f sdist
 
