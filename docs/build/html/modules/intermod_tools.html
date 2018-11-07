@@ -9,7 +9,7 @@
     <title>Intermod Tools &#8212; Intermod Library 0.1.0 documentation</title>
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -42,7 +42,7 @@
   <div class="section" id="module-intermod_library.intermod_tools">
 <span id="intermod-tools"></span><h1>Intermod Tools<a class="headerlink" href="#module-intermod_library.intermod_tools" title="Permalink to this headline">¶</a></h1>
 <p>Intermod Tools</p>
-<p>&#64;author: wboxx</p>
+<p>&#64;author: William Boxx</p>
 <dl class="function">
 <dt id="intermod_library.intermod_tools.harmonic_toi">
 <code class="descclassname">intermod_library.intermod_tools.</code><code class="descname">harmonic_toi</code><span class="sig-paren">(</span><em>frqs</em>, <em>order</em>, <em>band_of_interest=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#intermod_library.intermod_tools.harmonic_toi" title="Permalink to this definition">¶</a></dt>
@@ -56,11 +56,13 @@ which ones fall within the given band of interest.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>frqs</strong> (<em>float</em>) – list of frequencies</li>
 <li><strong>order</strong> (<em>integer</em>) – largest order of harmonic</li>
-<li><strong>band_of_interest</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – tuple containing the lower and upper values of the band of interest</li>
+<li><strong>band_of_interest</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – tuple containing the lower and upper
+values of the band of interest</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas dataframe that lists harmonics and emphasizes those in boi with **</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas dataframe that lists harmonics
+and emphasizes those in boi with **</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
@@ -108,7 +110,7 @@ which ones fall within the given band of interest.</p>
 <dl class="function">
 <dt id="intermod_library.intermod_tools.intermod_table">
 <code class="descclassname">intermod_library.intermod_tools.</code><code class="descname">intermod_table</code><span class="sig-paren">(</span><em>signals</em>, <em>order</em><span class="sig-paren">)</span><a class="headerlink" href="#intermod_library.intermod_tools.intermod_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates intermodulation products between the given signals to the specified order</p>
+<dd><p>Calculates intermodulation products between the given signals</p>
 <p>Will calculate all intermodulation products that could be potentially
 created between the given signals.  Must specify the highest order of
 intermods.</p>
@@ -239,7 +241,7 @@ intermods.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, William Boxx.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
     </div>
   </body>
 </html>
