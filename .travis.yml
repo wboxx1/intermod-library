@@ -14,7 +14,7 @@ env:
 # Command to install unit testers and package managers
 before_install: 
 - curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-- source $HOME/.poetry/bin
+- source .bashrc
 - pip install -U tox-travis
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
