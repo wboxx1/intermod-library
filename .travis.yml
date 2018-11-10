@@ -10,14 +10,11 @@ env:
   - secure: "Upi2gX0t8IGFIOe+tmQYAFgSbfBo9GomQZ9x5jGY0p/vot8J+aXLLzXWKEoQeaXWkxus3du7tW8vX4sIad4cztwp7fX26RJVfKich60LAAsnuenls30g/REbSVAZq804Gv13Z/uculcjpsOzygZ/XEJjqylmlBGDNrofxKNZzjFUe2UVjwGaNOzGqkqD4bp5CWYvHcNZtqRokWFtoajhu6+dLSAvxuutm/re1JOWljYqHU1aAmv0y8JR06Li9N1326vDEK3FT0INtM/PERmtfhsf2qFp23gkwjk/gqN1p3EqmC849Hb+HSVP4Y/hwwfcGrvHq8vSCsFjPo0RJUN3QO2loIgNPR1nTQw8OCXIvPqZbZk30v4N1DocNVGTOk3h5JZ++5ygv3MitudpaU4nJzcoP/6xnQV5Gy7v+ipBJqtHahrIPoOtQ3e5It7t5oTZU6EUZyF3gxmVrDtuJogC9wrq233ysE3TY5p52+uXIiuzGxiI6SV+kQgBVhPg/zz2M9e/68xMLsza9sxMFyRG5IWgWWF+2czshmZZuuSberDmjtjYFVk9luFqRW4g0KRikUYv7IX7zB/G4Yf77cSucA3iDmRXY0M2qI5Njb4GWh4bmeZ/FxGXEXLPHu+Rfg+I4vt9MKN3DR3HVEBm0L3r79vKCZ+nz+8i90KCJN6h/Ek="
   - secure: "HWZGKdT1DxLuhXAzoYCXpBZCkqMaPiBXC02QdzaORQqyZtwS+d8G7cG5Ix5GU9SMqiRSbccOtXnepROsJoMesFURBVHb1tvhwtuILSUye6K13kGqPM5Dffe2jAI9R0ng6IQWmTxoBhAHhKqHmnR1MncFBzvOcKQYbAJefGvnaGIvTDeVFwZ+HlGV8ckw+6UsSeBEyIIWxDojiUaPBhfW3x//Ls92+wPndTtLOB++ywspvYoy9vtYHAXBJ1clzpKfdFsOgVg6q+Q1AIxKqARYWxopvn0BM1zMGuHRMbCiJJzi+E1R5eStYEvKUkep9aaih3+gHqGLhdN0RIwMFta0X9cij8JrtA++n/n8+eL0Oe3dXpc1UvVjTwBXaA1vxelwwlNLYTGz3Y40u8R9RDlMsx5qO9tsiMSEtlL0vrK6iPqkyEYhSzDUXny7ZX+w9XkvTWeuFpYhNqC0dIJre7EJjzIcDmTzu0hv/b+sPG11veyco4l4BsLRp8s6xN/jto8xv8nBUuJ2WuigjfAq9AFE3bnCx7yOuVjSSkAGHEugitoEWhtxxEAHTgwudTNoSU5IdE+FIVCBetv9hUiZ4YaEolXbV4hjQXfmD+X5Hfg447zMDT7JeA8SESdYibs9QgtDhO5fyvCSfp8FJTFFVdazUTLTVs31lh7gpDPs8icdDp0="
 
-
-# Command to install unit testers and package managers
-before_install: 
+# Command to install unit testers and package managers.  
+# Dependency installation will be done in tox.
+install:
 - pip install -U poetry
 - pip install -U tox-travis
-
-# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install:
 
 # Command to run tests, e.g. python setup.py test
 script: tox
