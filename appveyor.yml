@@ -3,36 +3,36 @@
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python35"
-      TOX_ENV: "py35"
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python35"
+    #   TOX_ENV: "py35"
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python35-x64"
-      TOX_ENV: "py35"
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python35-x64"
+    #   TOX_ENV: "py35"
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python36"
-      TOX_ENV: "py36"
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python36"
+    #   TOX_ENV: "py36"
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python36-x64"
-      TOX_ENV: "py36"
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python36-x64"
+    #   TOX_ENV: "py36"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+
+stack: python 3
 
 init:
   - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
   - cmd: "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
   - cmd: "%PYTHON%/python -V"
   - cmd: "%PYTHON%/python -c \"import struct;print(8 * struct.calcsize(\'P\'))\""
-  - sh: 
 
 install:
   - cmd: "%PYTHON%/Scripts/easy_install -U pip"
   - cmd: "%PYTHON%/Scripts/pip install tox"
   - cmd: "%PYTHON%/Scripts/pip install poetry"
-  - sh: "python -m pip install -U pip"
   - sh: "pip install -U tox"
   - sh: "pip install -U poetry"
 
