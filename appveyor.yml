@@ -19,7 +19,7 @@ environment:
       PYTHON: "C:\\Python36-x64"
       TOX_ENV: "py36"
 
-    -APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
 
 init:
   - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
