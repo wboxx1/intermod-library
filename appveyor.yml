@@ -20,14 +20,18 @@ environment:
     #   TOX_ENV: "py36"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYSTACK: "3.5"
 
-stack: python 3
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYSTACK: "3.6"
 
 init:
   - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
   - cmd: "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
   - cmd: "%PYTHON%/python -V"
   - cmd: "%PYTHON%/python -c \"import struct;print(8 * struct.calcsize(\'P\'))\""
+
+stack: python %PYSTACK%
 
 install:
   - cmd: "%PYTHON%/Scripts/easy_install -U pip"
