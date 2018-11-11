@@ -11,17 +11,29 @@ repository = "https://github.com/wboxx1/intermod-library"
 homepage = "https://wboxx1.github.io/intermod-library/"
 
 packages = [
-    { include = "intermod_library", from = "src"},
+    { include = "intermod_library", from = "src" },
+    { include = "helpers", from = "src"},
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.5"
 numpy = "^1.15"
 pandas = "^0.23"
 scipy = "^1.1"
 matplotlib = "^3.0"
 
 [tool.poetry.dev-dependencies]
+bumpversion = "^0.5.3"
+wheel = "^0.32.1"
+watchdog = "^0.9.0"
+flake8 = "^3.5.0"
+tox = "^3.5.2"
+coverage = "^4.5.1"
+Sphinx = "^1.8.1"
+twine = "^1.12.1"
+pytest = "^3.8.2"
+pytest-runner = "^4.2"
+setuptools = "^40.5.0"
 
 [build-system]
 requires = ["poetry>=0.12"]

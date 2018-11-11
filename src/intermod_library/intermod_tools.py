@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """
 Intermod Tools
 
@@ -8,10 +9,11 @@ Intermod Tools
 
 import numpy as np
 import pandas as pd
-import helpers.helper_functions
+# import helpers.helper_functions
+
 
 def intermod_table(signals, order):
-    """Calculates intermodulation products between the given signals to the specified order
+    """Calculates intermodulation products between the given signals
 
     Will calculate all intermodulation products that could be potentially
     created between the given signals.  Must specify the highest order of
@@ -60,7 +62,7 @@ def intermod_table(signals, order):
     B = np.ones(2**M)
     coefmat = np.reshape(np.kron(B, coefmat), [-1, M])
 
-    #% make sign array
+    # Make sign array
     A = np.array([1, -1])
     signmat = np.zeros([2**M, M])
     ind = 0
@@ -83,7 +85,7 @@ def intermod_table(signals, order):
     intermods = np.dot(finalmat, signals)
     intermod_order = np.sum(abs(finalmat), 1)
     final = np.column_stack((intermods, finalmat, intermod_order))
-    
+
     header = ['Frequency']
     for i in np.arange(M):
         header = header + ['Signal ' + str(i+1)]
@@ -109,11 +111,13 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
 
     :param frqs: list of frequencies
     :param order: largest order of harmonic
-    :param band_of_interest: tuple containing the lower and upper values of the band of interest
+    :param band_of_interest: tuple containing the lower and upper
+        values of the band of interest
     :type frqs: float
     :type order: integer
     :type band_of_interest: tuple(float)
-    :returns: pandas dataframe that lists harmonics and emphasizes those in boi with **
+    :returns: pandas dataframe that lists harmonics
+        and emphasizes those in boi with **
     :Example:
 
     >>> import intermod_library.intermod_tools as it
@@ -134,7 +138,7 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
     =========== =========
     """
 
-    if (len(band_of_interest) == 0) | (len(band_of_interest) == 1) :
+    if (len(band_of_interest) == 0) | (len(band_of_interest) == 1):
         lower = 1.0
         upper = -1.0
     else:
