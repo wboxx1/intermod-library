@@ -1,5 +1,8 @@
 # Config file for automatic testing at travis-ci.org
 sudo: false
+os:
+  - linux
+  - windows
 language: python
 python:
   - 3.6
@@ -24,7 +27,7 @@ script: tox
 
 before_deploy:
 - poetry config http-basic.mypypi $MYPYPI_USER $MYPYPI_PASS
-- poetry build -f sdist
+- poetry build
 
 deploy:
   provider: script

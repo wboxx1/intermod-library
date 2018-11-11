@@ -20,11 +20,11 @@ environment:
       TOX_ENV: "py36"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      PYSTACK: "3.5"
+      PYTHON: "3.5"
       TOX_ENV: "py35"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      PYSTACK: "3.6"
+      PYTHON: "3.6"
       TOX_ENV: "py36"
 
 init:
@@ -33,7 +33,7 @@ init:
   - cmd: "%PYTHON%/python -V"
   - cmd: "%PYTHON%/python -c \"import struct;print(8 * struct.calcsize(\'P\'))\""
 
-stack: python %PYSTACK%
+stack: python %PYTHON%
 
 install:
   - cmd: "%PYTHON%/Scripts/easy_install -U pip"
