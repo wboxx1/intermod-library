@@ -8,7 +8,7 @@ license = "GPL-3.0"
 readme = "README.rst"
 
 repository = "https://github.com/wboxx1/intermod-library"
-homepage = "https://wboxx1.github.io/intermod-library/build/html/index.html"
+homepage = "https://wboxx1.github.io/intermod-library/"
 
 packages = [
     { include = "intermod_library", from = "src"},
