@@ -2,30 +2,38 @@
 # http://www.appveyor.com/docs/installed-software#python
 
 environment:
+  MYPIPY_PASS:
+    secure: 
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python35"
       TOX_ENV: "py35"
+      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python35-x64"
       TOX_ENV: "py35"
+      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python36"
       TOX_ENV: "py36"
+      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python36-x64"
       TOX_ENV: "py36"
+      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYTHON: "3.5"
       TOX_ENV: "py35"
+      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYTHON: "3.6"
       TOX_ENV: "py36"
+      DEPLOY: "true"
 
 init:
   - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
@@ -55,3 +63,13 @@ after_test:
 
 artifacts:
   - path: dist\*
+
+before_deploy:
+  - poetry config http-basic.mypypi $MYPYPI_USER $MYPYPI_PASS
+
+deploy_script:
+  - ps: |
+      if (($Env.APPVEYOR_REPO_TAG -eq "true") -and ($Env.DEPLOY -eq "true"))
+      { 
+        poetry publish 
+      }
