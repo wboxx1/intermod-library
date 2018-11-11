@@ -3,7 +3,7 @@
 
 environment:
   MYPIPY_PASS:
-    secure: 
+    secure: SEvlitnAdM1GA2tm3AIENvQorlxl3vU41/2Jol2hTdc=
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python35"
