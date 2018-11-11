@@ -3,21 +3,21 @@
 
 environment:
   matrix:
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python35"
-    #   TOX_ENV: "py35"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35"
+      TOX_ENV: "py35"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python35-x64"
-    #   TOX_ENV: "py35"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35-x64"
+      TOX_ENV: "py35"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python36"
-    #   TOX_ENV: "py36"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36"
+      TOX_ENV: "py36"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python36-x64"
-    #   TOX_ENV: "py36"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36-x64"
+      TOX_ENV: "py36"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYSTACK: "3.5"
