@@ -21,9 +21,11 @@ environment:
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYSTACK: "3.5"
+      TOX_ENV: "py35"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYSTACK: "3.6"
+      TOX_ENV: "py36"
 
 init:
   - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
@@ -44,7 +46,7 @@ build: false  # Not a C# project, build stuff at the test step instead.
 
 test_script:
   - cmd: "%PYTHON%/Scripts/tox -e %TOX_ENV%"
-  - sh: "tox"
+  - sh: "tox -e %TOX_ENV%"
 
 after_test:
   - cmd: "%PYTHON%/Scripts/poetry build"
