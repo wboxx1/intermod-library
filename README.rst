@@ -14,9 +14,7 @@ https://wboxx1.github.io/intermod-library
 Installation:
 --------------
 
-Pip:
-
-.. code-block:: pypi
+Using pip::
 
     pip install intermod-library
 

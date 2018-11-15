@@ -1,0 +1,75 @@
+# What Python version is installed where:
+# http://www.appveyor.com/docs/installed-software#python
+
+environment:
+  PIPY_PASS:
+    secure: SEvlitnAdM1GA2tm3AIENvQorlxl3vU41/2Jol2hTdc=
+  matrix:
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python35"
+    #   TOX_ENV: "py35"
+    #   DEPLOY: "false"
+
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python35-x64"
+    #   TOX_ENV: "py35"
+    #   DEPLOY: "false"
+
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python36"
+    #   TOX_ENV: "py36"
+    #   DEPLOY: "false"
+
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python36-x64"
+    #   TOX_ENV: "py36"
+    #   DEPLOY: "false"
+
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    #   PYTHON: "3.5"
+    #   TOX_ENV: "py35"
+    #   DEPLOY: "false"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON: "3.6"
+      TOX_ENV: "py36"
+      DEPLOY: "true"
+
+init:
+  - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;C:\MinGW\msys\1.0\bin;%PATH%
+  - cmd: "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
+  - cmd: "%PYTHON%/python -V"
+  - cmd: "%PYTHON%/python -c \"import struct;print(8 * struct.calcsize(\'P\'))\""
+
+stack: python %PYTHON%
+
+install:
+  - cmd: "%PYTHON%/Scripts/easy_install -U pip"
+  - cmd: "%PYTHON%/Scripts/pip install tox"
+  - cmd: "%PYTHON%/Scripts/pip install poetry"
+  - sh: "pip install -U tox"
+  - sh: "pip install -U poetry"
+
+build: false  # Not a C# project, build stuff at the test step instead.
+
+test_script:
+  - cmd: "%PYTHON%/Scripts/tox -e %TOX_ENV%"
+  - sh: "tox -e $TOX_ENV"
+
+after_test:
+  - cmd: "%PYTHON%/Scripts/poetry build"
+  - sh: "poetry build"
+  - ps: "ls dist"
+
+artifacts:
+  - path: dist\*
+
+before_deploy:
+  - poetry config http-basic.pypi wboxx1 %PYPI_PASS%
+
+deploy_script:
+  - ps: |
+      if ($Env.DEPLOY -eq "true")
+      { 
+        poetry publish 
+      }

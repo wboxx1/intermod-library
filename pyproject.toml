@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "intermod-library"
-version = "0.1.0"
+version = "0.1.2"
 description = "A library of tools for finding and viewing intermodulation products and harmonics"
 authors = ["Will Boxx <wboxx1@gmail.com>"]
 license = "GPL-3.0"
@@ -8,7 +8,7 @@ license = "GPL-3.0"
 readme = "README.rst"
 
 repository = "https://github.com/wboxx1/intermod-library"
-homepage = "https://wboxx1.github.io/intermod-library/build/html/index.html"
+homepage = "https://wboxx1.github.io/intermod-library/"
 
 packages = [
     { include = "intermod_library", from = "src" },

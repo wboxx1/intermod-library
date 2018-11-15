@@ -21,13 +21,13 @@ script: tox
 
 before_deploy:
 - poetry config http-basic.mypypi $MYPYPI_USER $MYPYPI_PASS
-- poetry build -f sdist
+- poetry build
 
-deploy:
-  provider: script
-  script: poetry publish
-  on:
-    tags: true
-    repo: wboxx1/intermod-library
-    branch: master
-    python: 3.6
+# deploy:
+#   provider: script
+#   script: poetry publish
+#   on:
+#     tags: true
+#     repo: wboxx1/intermod-library
+#     branch: master
+#     python: 3.6
