@@ -1,6 +1,13 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import intermod_library.intermod_tools as it
+"""Tests for `intermod_library` package."""
+
+import pytest
+
+
+import intermod_library as it
+
 
 def test_intermod_table():
     signals = [1000, 2000]
