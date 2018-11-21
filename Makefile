@@ -60,10 +60,10 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source src/intermod_library -m pytest
-	coverage report -m
-	coverage html
-	$(BROWSER) htmlcov/index.html
+	poetry run coverage run --source src/intermod_library -m pytest
+	poetry run coverage report -m
+	poetry run coverage html
+	poetry run $(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/intermod_library.rst

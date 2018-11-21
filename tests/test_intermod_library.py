@@ -6,7 +6,7 @@
 import pytest
 
 
-import intermod_library as it
+import intermod_library.intermod_library as it
 
 
 def test_intermod_table():
