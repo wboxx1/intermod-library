@@ -12,7 +12,7 @@ Documentation can be found at:
 https://wboxx1.github.io/intermod-library
 
 Installation:
---------------
+-------------
 
 Using pip::
 
