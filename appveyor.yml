@@ -64,7 +64,7 @@ after_test:
 artifacts:
   - path: dist\*
 before_deploy:
-    - cmd: poetry config http-basic.pypi wboxx1 %PYPI_PASS%
+    - ps: poetry config http-basic.pypi wboxx1 $PYPI_PASS
     - sh: poetry config http-basic.pypi wboxx1 %PYPI_PASS%
 
 deploy_script:
