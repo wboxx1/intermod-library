@@ -5,30 +5,30 @@ environment:
   PIPY_PASS:
     secure: SEvlitnAdM1GA2tm3AIENvQorlxl3vU41/2Jol2hTdc=
   matrix:
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python35"
-    #   TOX_ENV: "py35"
-    #   DEPLOY: "false"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35"
+      TOX_ENV: "py35"
+      DEPLOY: "false"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python35-x64"
-    #   TOX_ENV: "py35"
-    #   DEPLOY: "false"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35-x64"
+      TOX_ENV: "py35"
+      DEPLOY: "false"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python36"
-    #   TOX_ENV: "py36"
-    #   DEPLOY: "false"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36"
+      TOX_ENV: "py36"
+      DEPLOY: "false"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    #   PYTHON: "C:\\Python36-x64"
-    #   TOX_ENV: "py36"
-    #   DEPLOY: "false"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36-x64"
+      TOX_ENV: "py36"
+      DEPLOY: "false"
 
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-    #   PYTHON: "3.5"
-    #   TOX_ENV: "py35"
-    #   DEPLOY: "false"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON: "3.5"
+      TOX_ENV: "py35"
+      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYTHON: "3.6"
@@ -63,13 +63,12 @@ after_test:
 
 artifacts:
   - path: dist\*
-
 before_deploy:
   - poetry config http-basic.pypi wboxx1 %PYPI_PASS%
 
 deploy_script:
   - ps: |
-      if ($Env.DEPLOY -eq "true")
+      if (($Env.APPVEYOR_REPO_TAG -eq "true") -and ($Env.DEPLOY -eq "true"))
       { 
         poetry publish 
       }
