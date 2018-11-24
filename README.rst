@@ -12,7 +12,6 @@ intermod-library
 
 Installation:
 -------------
-=======
 .. image:: https://readthedocs.org/projects/intermod-library/badge/?version=latest
         :target: https://intermod-library.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
