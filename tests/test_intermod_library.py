@@ -4,7 +4,7 @@
 """Tests for `intermod_library` package."""
 
 
-import intermod_library.intermod_tools as it
+import intermod_library.intermod_library as it
 
 
 def test_intermod_table():
