@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "intermod-library"
-version = "0.1.1"
+version = "0.1.2"
 description = "Tools for calculating and viewing intermodulation products and harmonics."
 authors = ["Will Boxx <wboxx1@gmail.com>"]
 license = "GPL-3.0"
