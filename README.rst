@@ -6,19 +6,17 @@ intermod-library
 .. image:: https://img.shields.io/pypi/v/intermod_library.svg
         :target: https://pypi.python.org/pypi/intermod_library
 
-.. image:: https://ci.appveyor.com/api/projects/status/wboxx1/intermod-library?branch=master&svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/9g3f22ws5v3rb4ja/branch/master?svg=true
     :target: https://ci.appveyor.com/project/wboxx1/intermod-library/branch/master
     :alt: Build status on Appveyor
 
-Installation:
--------------
-.. image:: https://readthedocs.org/projects/intermod-library/badge/?version=latest
-        :target: https://intermod-library.readthedocs.io/en/latest/?badge=latest
+.. image:: https://wboxx1.github.io/intermod-library/_build/html/index.html
+        :target: https://wboxx1.github.io/intermod-library/_build/html/index.html
         :alt: Documentation Status
 
 
-.. image:: https://pyup.io/repos/github/wboxx1/intermod_library/shield.svg
-     :target: https://pyup.io/repos/github/wboxx1/intermod_library/
+.. image:: https://pyup.io/repos/github/wboxx1/intermod-library/shield.svg
+     :target: https://pyup.io/repos/github/wboxx1/intermod-library/
      :alt: Updates
 
 Tools for calculating and viewing intermodulation products and harmonics.
@@ -28,6 +26,12 @@ Tools for calculating and viewing intermodulation products and harmonics.
 
 * Documentation: https://wboxx1.github.io/intermod-library
 
+Installation:
+-------------
+
+.. code-block:: console
+
+    $ pip install intermod-library
 
 
 Features

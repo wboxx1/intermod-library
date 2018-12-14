@@ -12,7 +12,7 @@ To install intermod-library, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install intermod_library
+    $ pip install intermod-library
 
 This is the preferred method to install intermod-library, as it will always install the most recent stable release.
 
