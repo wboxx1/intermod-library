@@ -12,7 +12,7 @@ To install intermod-library, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install intermod_library
+    $ pip install intermod-library
 
 This is the preferred method to install intermod-library, as it will always install the most recent stable release.
 
@@ -38,13 +38,13 @@ Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/wboxx1/intermod_library/tarball/master
+    $ curl  -OL https://github.com/wboxx1/intermod-library/tarball/master
 
-Once you have a copy of the source, you can install it with:
+Once you have a copy of the source, you can install into poetry virtual environment with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ poetry install
 
 
 .. _Github repo: https://github.com/wboxx1/intermod_library

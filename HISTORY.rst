@@ -15,4 +15,4 @@ History
 0.1.3 (2018-12-13)
 -------------------
 
-* Fixed depedency bug
+* Fixed dependency bug

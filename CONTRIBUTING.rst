@@ -57,16 +57,16 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `intermod_library` for local development.
+Ready to contribute? Here's how to set up `intermod-library` for local development.
 
-1. Fork the `intermod_library` repo on GitHub.
+1. Fork the `intermod-library` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/intermod_library.git
+    $ git clone git@github.com:your_name_here/intermod-library.git
 
 3. Install your local copy into a virtualenv using poetry. Assuming you have poetry installed, this is how you set up your fork for local development::
 
-    $ cd intermod_library/
+    $ cd intermod-library/
     $ poetry install
     $ poetry shell
 

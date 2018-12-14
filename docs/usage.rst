@@ -4,4 +4,4 @@ Usage
 
 To use intermod-library in a project::
 
-    import intermod-library
+    import intermod_library.intermod_library
