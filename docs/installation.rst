@@ -38,13 +38,13 @@ Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/wboxx1/intermod_library/tarball/master
+    $ curl  -OL https://github.com/wboxx1/intermod-library/tarball/master
 
-Once you have a copy of the source, you can install it with:
+Once you have a copy of the source, you can install into poetry virtual environment with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ poetry install
 
 
 .. _Github repo: https://github.com/wboxx1/intermod_library
