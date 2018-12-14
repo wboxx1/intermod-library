@@ -20,3 +20,10 @@ def test_harmonic_toi():
     band_of_interest = [2500, 3500]
     table = it.harmonic_toi(frqs, order, band_of_interest)
     assert table["Signal 1"].sum() == "1000.02000.0**3000.04000.05000.0"
+
+def test_harmonic_toi_no_boi():
+    frqs = [1000]
+    order = 5
+    band_of_interest = []
+    table = it.harmonic_toi(frqs, order, band_of_interest)
+    assert table["Signal 1"].sum() == "1000.02000.03000.04000.05000.0"
