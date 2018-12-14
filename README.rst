@@ -10,11 +10,6 @@ intermod-library
     :target: https://ci.appveyor.com/project/wboxx1/intermod-library/branch/master
     :alt: Build status on Appveyor
 
-.. image:: https://wboxx1.github.io/intermod-library/_build/html/index.html
-        :target: https://wboxx1.github.io/intermod-library/_build/html/index.html
-        :alt: Documentation Status
-
-
 .. image:: https://pyup.io/repos/github/wboxx1/intermod-library/shield.svg
      :target: https://pyup.io/repos/github/wboxx1/intermod-library/
      :alt: Updates
