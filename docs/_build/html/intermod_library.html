@@ -117,6 +117,89 @@ and emphasizes those in boi with **</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="intermod_library.intermod_library.intermod_locate">
+<code class="descclassname">intermod_library.intermod_library.</code><code class="descname">intermod_locate</code><span class="sig-paren">(</span><em>soi</em>, <em>pivot</em>, <em>order</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/intermod_library/intermod_library.html#intermod_locate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#intermod_library.intermod_library.intermod_locate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a list of frequencies that would create an intermod at soi.</p>
+<p>Will calculate a list of frequencies that could combine with the pivot
+to create intermods at the signal of interest (soi).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>soi</strong> (<em>float</em>) – signal of interest</li>
+<li><strong>pivot</strong> (<em>float</em>) – pivot frequency</li>
+<li><strong>order</strong> (<em>integer</em>) – largest order of harmonic</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas dataframe that lists possible frequencies and order</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">intermod_library.intermod_library</span> <span class="k">as</span> <span class="nn">il</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">soi</span> <span class="o">=</span> <span class="mf">2227.75</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pivot</span> <span class="o">=</span> <span class="mf">2196.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">intermod_locate</span><span class="p">(</span><span class="n">soi</span><span class="p">,</span> <span class="n">pivot</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span>
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">&lt;index&gt;</th>
+<th class="head">Frequency</th>
+<th class="head">Signal 1</th>
+<th class="head">Signal 2</th>
+<th class="head">Order</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0</td>
+<td>15.875</td>
+<td>1.0</td>
+<td>2.0</td>
+<td>3.0</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>31.750</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>2.0</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>742.583</td>
+<td>0.0</td>
+<td>3.0</td>
+<td>3.0</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>1113.875</td>
+<td>0.0</td>
+<td>2.0</td>
+<td>2.0</td>
+</tr>
+<tr class="row-even"><td>4</td>
+<td>2164.250</td>
+<td>2.0</td>
+<td>-1.0</td>
+<td>3.0</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="intermod_library.intermod_library.intermod_table">
 <code class="descclassname">intermod_library.intermod_library.</code><code class="descname">intermod_table</code><span class="sig-paren">(</span><em>signals</em>, <em>order</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/intermod_library/intermod_library.html#intermod_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#intermod_library.intermod_library.intermod_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates intermodulation products between the given signals</p>
