@@ -16,3 +16,9 @@ History
 -------------------
 
 * Fixed dependency bug
+
+
+0.2.0 (2019-05-03)
+-------------------
+
+* Added intermod locate function
