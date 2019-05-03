@@ -204,6 +204,103 @@
                 <span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="intermod_locate"><a class="viewcode-back" href="../../intermod_library.html#intermod_library.intermod_library.intermod_locate">[docs]</a><span class="k">def</span> <span class="nf">intermod_locate</span><span class="p">(</span><span class="n">soi</span><span class="p">,</span> <span class="n">pivot</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates a list of frequencies that would create an intermod at soi. </span>
+
+<span class="sd">    Will calculate a list of frequencies that could combine with the pivot</span>
+<span class="sd">    to create intermods at the signal of interest (soi).</span>
+
+<span class="sd">    :param soi: signal of interest</span>
+<span class="sd">    :param pivot: pivot frequency</span>
+<span class="sd">    :param order: largest order of harmonic</span>
+<span class="sd">    :type soi: float</span>
+<span class="sd">    :type pivot: float</span>
+<span class="sd">    :type order: integer</span>
+<span class="sd">    :returns: pandas dataframe that lists possible frequencies and order</span>
+<span class="sd">    :Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; import intermod_library.intermod_library as il</span>
+<span class="sd">    &gt;&gt;&gt; soi = 2227.75 </span>
+<span class="sd">    &gt;&gt;&gt; pivot = 2196.0</span>
+<span class="sd">    &gt;&gt;&gt; order = 3</span>
+<span class="sd">    &gt;&gt;&gt; table = il.intermod_locate(soi, pivot, order)</span>
+<span class="sd">    &gt;&gt;&gt; table</span>
+
+<span class="sd">    ========= ========= ========= ========= =========</span>
+<span class="sd">    &lt;index&gt;   Frequency Signal 1  Signal 2  Order</span>
+<span class="sd">    ========= ========= ========= ========= =========</span>
+<span class="sd">    0           15.875    1.0       2.0       3.0</span>
+<span class="sd">    1           31.750    1.0       1.0       2.0</span>
+<span class="sd">    2          742.583    0.0       3.0       3.0</span>
+<span class="sd">    3         1113.875    0.0       2.0       2.0</span>
+<span class="sd">    4         2164.250    2.0      -1.0       3.0</span>
+<span class="sd">    ========= ========= ========= ========= =========</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># Number of signals</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+    <span class="n">coefmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N</span><span class="o">**</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">])</span>
+
+    <span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">N</span><span class="o">**</span><span class="p">(</span><span class="n">M</span><span class="o">-</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">N</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">m</span><span class="p">])</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+        <span class="n">coefmat</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">M</span><span class="p">)</span>
+    <span class="n">coefmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">coefmat</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span><span class="p">])</span>
+
+    <span class="c1"># Make sign array</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">signmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">2</span><span class="o">**</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">])</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">M</span><span class="o">-</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">m</span><span class="p">])</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+        <span class="n">signmat</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">coefmat</span><span class="p">)</span><span class="o">/</span><span class="n">M</span>
+    <span class="n">firstblock</span> <span class="o">=</span> <span class="n">signmat</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="n">M</span><span class="p">)):</span>
+        <span class="n">signmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">signmat</span><span class="p">,</span> <span class="n">firstblock</span><span class="p">])</span>
+
+    <span class="n">finalmat</span> <span class="o">=</span> <span class="n">coefmat</span> <span class="o">*</span> <span class="n">signmat</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">finalmat</span><span class="p">:</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">soi</span> <span class="o">-</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">pivot</span><span class="p">)</span> <span class="o">/</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1">#intermods = np.dot(finalmat, signals)</span>
+    <span class="n">intermod_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">finalmat</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="n">finalmat</span><span class="p">,</span> <span class="n">intermod_order</span><span class="p">))</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Signal &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Order&#39;</span><span class="p">]</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">final</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+
+    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Frequency &gt; 0 &amp; Frequency &lt; inf&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;(Order &gt; 0) &amp; (Order &lt;= @order)&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

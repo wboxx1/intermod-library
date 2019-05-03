@@ -32,7 +32,7 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/wboxx1/intermod_library
+    $ git clone git://github.com/wboxx1/intermod-library
 
 Or download the `tarball`_:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install into poetry virtual environm
     $ poetry install
 
 
-.. _Github repo: https://github.com/wboxx1/intermod_library
-.. _tarball: https://github.com/wboxx1/intermod_library/tarball/master
+.. _Github repo: https://github.com/wboxx1/intermod-library
+.. _tarball: https://github.com/wboxx1/intermod-library/tarball/master

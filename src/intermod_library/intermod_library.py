@@ -166,3 +166,100 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
                 T.iloc[i, j] = str(T.iloc[i, j])
 
     return T
+
+
+def intermod_locate(soi, pivot, order):
+    """Calculates a list of frequencies that would create an intermod at soi. 
+
+    Will calculate a list of frequencies that could combine with the pivot
+    to create intermods at the signal of interest (soi).
+
+    :param soi: signal of interest
+    :param pivot: pivot frequency
+    :param order: largest order of harmonic
+    :type soi: float
+    :type pivot: float
+    :type order: integer
+    :returns: pandas dataframe that lists possible frequencies and order
+    :Example:
+
+    >>> import intermod_library.intermod_library as il
+    >>> soi = 2227.75 
+    >>> pivot = 2196.0
+    >>> order = 3
+    >>> table = il.intermod_locate(soi, pivot, order)
+    >>> table
+
+    ========= ========= ========= ========= =========
+    <index>   Frequency Signal 1  Signal 2  Order
+    ========= ========= ========= ========= =========
+    0           15.875    1.0       2.0       3.0
+    1           31.750    1.0       1.0       2.0
+    2          742.583    0.0       3.0       3.0
+    3         1113.875    0.0       2.0       2.0
+    4         2164.250    2.0      -1.0       3.0
+    ========= ========= ========= ========= =========
+    """
+
+    M = 2   # Number of signals
+    N = order + 1
+
+    A = np.arange(0, N)
+
+    coefmat = np.zeros([N**M, M])
+
+    ind = 0
+
+    for i in range(M, 0, -1):
+        m = N**(M-i)
+        B = np.ones([N**(i-1), m])
+        C = np.kron(B, A)
+        coefmat[:, ind] = C.T.ravel()
+        ind += 1
+
+    B = np.ones(2**M)
+    coefmat = np.reshape(np.kron(B, coefmat), [-1, M])
+
+    # Make sign array
+    A = np.array([1, -1])
+    signmat = np.zeros([2**M, M])
+    ind = 0
+
+    for i in range(M, 0, -1):
+        m = 2**(M-i)
+        B = np.ones([2**(i - 1), m])
+        C = np.kron(B, A)
+        signmat[:, ind] = C.T.ravel()
+        ind += 1
+
+    j = np.size(coefmat)/M
+    firstblock = signmat
+
+    for i in range(1, int(j / 2**M)):
+        signmat = np.vstack([signmat, firstblock])
+
+    finalmat = coefmat * signmat
+    y = []
+
+    for pair in finalmat:
+        y.append((soi - pair[0] * pivot) / pair[1])
+
+    #intermods = np.dot(finalmat, signals)
+    intermod_order = np.sum(abs(finalmat), 1)
+    final = np.column_stack((y, finalmat, intermod_order))
+
+    header = ['Frequency']
+    for i in np.arange(M):
+        header = header + ['Signal ' + str(i+1)]
+
+    header = header + ['Order']
+
+    T = pd.DataFrame(final, columns=header)
+
+    T.query('Frequency > 0 & Frequency < inf', inplace=True)
+    T.query('(Order > 0) & (Order <= @order)', inplace=True)
+    T.drop_duplicates(inplace=True)
+    T.sort_values(by=['Frequency'], inplace=True)
+    T.reset_index(drop=True, inplace=True)
+
+    return (T)

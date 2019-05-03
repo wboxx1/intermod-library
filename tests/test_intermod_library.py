@@ -27,3 +27,10 @@ def test_harmonic_toi_no_boi():
     band_of_interest = []
     table = it.harmonic_toi(frqs, order, band_of_interest)
     assert table["Signal 1"].sum() == "1000.02000.03000.04000.05000.0"
+
+def test_intermod_locate():
+    soi = 2227.75 
+    pivot = 2196.0
+    order = 3
+    table = it.intermod_locate(soi, pivot, order)
+    assert round(table.Frequency.sum() - 19551.4583, 4) == 0
