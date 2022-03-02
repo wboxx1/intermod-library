@@ -6,33 +6,23 @@ environment:
     secure: SEvlitnAdM1GA2tm3AIENvQorlxl3vU41/2Jol2hTdc=
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python35"
-      TOX_ENV: "py35"
+      PYTHON: "C:\\Python38"
+      TOX_ENV: "py38"
       DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python35-x64"
-      TOX_ENV: "py35"
-      DEPLOY: "false"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python36"
-      TOX_ENV: "py36"
-      DEPLOY: "false"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python36-x64"
-      TOX_ENV: "py36"
+      PYTHON: "C:\\Python38-x64"
+      TOX_ENV: "py38"
       DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      PYTHON: "3.5"
-      TOX_ENV: "py35"
+      PYTHON: "3.8"
+      TOX_ENV: "py38"
       DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      PYTHON: "3.6"
-      TOX_ENV: "py36"
+      PYTHON: "3.8"
+      TOX_ENV: "py38"
       DEPLOY: "true"
 
 init:
