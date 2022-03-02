@@ -9,6 +9,7 @@ Intermod Tools
 
 import numpy as np
 import pandas as pd
+import itertools
 # import helpers.helper_functions
 
 
@@ -44,43 +45,45 @@ def intermod_table(signals, order):
     """
 
     M = np.size(signals)   # Number of signals
-    N = order + 1
+    # N = order + 1
 
-    A = np.arange(0, N)
+    # A = np.arange(0, N)
 
-    coefmat = np.zeros([N**M, M])
+    # coefmat = np.zeros([N**M, M])
 
-    ind = 0
+    # ind = 0
 
-    for i in range(M, 0, -1):
-        m = N**(M-i)
-        B = np.ones([N**(i-1), m])
-        C = np.kron(B, A)
-        coefmat[:, ind] = C.T.ravel()
-        ind += 1
+    # for i in range(M, 0, -1):
+    #     m = N**(M-i)
+    #     B = np.ones([N**(i-1), m])
+    #     C = np.kron(B, A)
+    #     coefmat[:, ind] = C.T.ravel()
+    #     ind += 1
 
-    B = np.ones(2**M)
-    coefmat = np.reshape(np.kron(B, coefmat), [-1, M])
+    # B = np.ones(2**M)
+    # coefmat = np.reshape(np.kron(B, coefmat), [-1, M])
 
-    # Make sign array
-    A = np.array([1, -1])
-    signmat = np.zeros([2**M, M])
-    ind = 0
+    # # Make sign array
+    # A = np.array([1, -1])
+    # signmat = np.zeros([2**M, M])
+    # ind = 0
 
-    for i in range(M, 0, -1):
-        m = 2**(M-i)
-        B = np.ones([2**(i - 1), m])
-        C = np.kron(B, A)
-        signmat[:, ind] = C.T.ravel()
-        ind += 1
+    # for i in range(M, 0, -1):
+    #     m = 2**(M-i)
+    #     B = np.ones([2**(i - 1), m])
+    #     C = np.kron(B, A)
+    #     signmat[:, ind] = C.T.ravel()
+    #     ind += 1
 
-    j = np.size(coefmat)/M
-    firstblock = signmat
+    # j = np.size(coefmat)/M
+    # firstblock = signmat
 
-    for i in range(1, int(j / 2**M)):
-        signmat = np.vstack([signmat, firstblock])
+    # for i in range(1, int(j / 2**M)):
+    #     signmat = np.vstack([signmat, firstblock])
 
-    finalmat = coefmat * signmat
+    # finalmat = coefmat * signmat
+
+    finalmat = np.array(list(itertools.product(range(-1*order, order+1,1),repeat=M)))
 
     intermods = np.dot(finalmat, signals)
     intermod_order = np.sum(abs(finalmat), 1)
@@ -169,7 +172,7 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
 
 
 def intermod_locate(soi, pivot, order):
-    """Calculates a list of frequencies that would create an intermod at soi. 
+    """Calculates a list of frequencies that would create an intermod at soi.
 
     Will calculate a list of frequencies that could combine with the pivot
     to create intermods at the signal of interest (soi).
@@ -184,7 +187,7 @@ def intermod_locate(soi, pivot, order):
     :Example:
 
     >>> import intermod_library.intermod_library as il
-    >>> soi = 2227.75 
+    >>> soi = 2227.75
     >>> pivot = 2196.0
     >>> order = 3
     >>> table = il.intermod_locate(soi, pivot, order)
@@ -244,7 +247,7 @@ def intermod_locate(soi, pivot, order):
     for pair in finalmat:
         y.append((soi - pair[0] * pivot) / pair[1])
 
-    #intermods = np.dot(finalmat, signals)
+    # intermods = np.dot(finalmat, signals)
     intermod_order = np.sum(abs(finalmat), 1)
     final = np.column_stack((y, finalmat, intermod_order))
 
