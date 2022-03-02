@@ -22,3 +22,8 @@ History
 -------------------
 
 * Added intermod locate function
+
+0.3.0-0.4.1 (2022-03-22)
+-------------------------
+
+* Optimized algorithms
