@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "intermod-library"
-version = "0.2.0"
+version = "0.4.0"
 description = "Tools for calculating and viewing intermodulation products and harmonics."
 authors = ["Will Boxx <wboxx1@gmail.com>"]
 license = "GPL-3.0"
@@ -16,10 +16,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.5"
-numpy = "^1.15"
-pandas = "^0.23"
-scipy = "^1.1"
+python = "=3.8"
+numpy = ">=1.16.5, <1.24.0"
+pandas = "=1.4.1"
+scipy = "=1.8"
 matplotlib = "^3.0"
 
 [tool.poetry.dev-dependencies]
@@ -34,7 +34,6 @@ twine = "^1.12.1"
 pytest = "^3.8.2"
 pytest-runner = "^4.2"
 pytest-cov = "^2.6.0"
-setuptools = "^40.5.0"
+setuptools = "^60.9.3"
 rstcheck = "^3.3.1"
 proselint= "^0.10.2"
-ptpython= "^2.0.4"
