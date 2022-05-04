@@ -113,7 +113,7 @@ function test() {
 Run tests on every Python version with tox
 #>
 function testAll() {
-    .\tox.ini
+    poetry run tox
 }
 
 <#

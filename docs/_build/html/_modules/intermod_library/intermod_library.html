@@ -52,7 +52,7 @@
 <span class="c1"># import helpers.helper_functions</span>
 
 
-<div class="viewcode-block" id="intermod_table"><a class="viewcode-back" href="../../intermod_library.html#intermod_library.intermod_library.intermod_table">[docs]</a><span class="k">def</span> <span class="nf">intermod_table</span><span class="p">(</span><span class="n">signals</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+<div class="viewcode-block" id="intermod_table"><a class="viewcode-back" href="../../intermod_library.html#intermod_library.intermod_library.intermod_table">[docs]</a><span class="k">def</span> <span class="nf">intermod_table</span><span class="p">(</span><span class="n">signals</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">maximum_single_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bandwidths</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculates intermodulation products between the given signals</span>
 
 <span class="sd">    Will calculate all intermodulation products that could be potentially</span>
@@ -60,9 +60,13 @@
 <span class="sd">    intermods.</span>
 
 <span class="sd">    :param signals: list of signals to calculate intermod products on</span>
-<span class="sd">    :param order: highest order of intermod products to calculate</span>
 <span class="sd">    :type signals: list[float]</span>
+<span class="sd">    :param order: highest order of intermod products to calculate</span>
 <span class="sd">    :type order: integer</span>
+<span class="sd">    :param maximum_single_order: the maximum order for a single frequency</span>
+<span class="sd">    :type maximum_single_order: integer</span>
+<span class="sd">    :param bandwidths: bandwidths of the provided signals.</span>
+<span class="sd">    :type bandwidths: list[float]</span>
 <span class="sd">    :returns: pandas dataframe containing the calculated intermod products</span>
 <span class="sd">    :Example:</span>
 
@@ -122,9 +126,14 @@
 
     <span class="c1"># finalmat = coefmat * signmat</span>
 
+    <span class="k">if</span> <span class="n">maximum_single_order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mso</span> <span class="o">=</span> <span class="n">order</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mso</span> <span class="o">=</span> <span class="n">maximum_single_order</span>
+
     <span class="n">finalmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
         <span class="nb">list</span><span class="p">(</span>
-            <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">order</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">mso</span><span class="p">,</span> <span class="n">mso</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
@@ -145,6 +154,12 @@
     <span class="n">T</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">find_bw</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">bws</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">bws</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bandwidths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">T</span><span class="p">[</span><span class="s1">&#39;bandwidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">find_bw</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">([</span><span class="n">bandwidths</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
 
@@ -318,11 +333,6 @@
     <span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
-
-<span class="n">soi</span> <span class="o">=</span> <span class="mf">2227.75</span>
-<span class="n">pivot</span> <span class="o">=</span> <span class="mf">2196.0</span>
-<span class="n">order</span> <span class="o">=</span> <span class="mi">7</span>
-<span class="n">table</span> <span class="o">=</span> <span class="n">intermod_locate</span><span class="p">(</span><span class="n">soi</span><span class="p">,</span> <span class="n">pivot</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
 </pre></div>
 
           </div>

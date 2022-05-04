@@ -202,7 +202,7 @@ to create intermods at the signal of interest (soi).</p>
 
 <dl class="function">
 <dt id="intermod_library.intermod_library.intermod_table">
-<code class="descclassname">intermod_library.intermod_library.</code><code class="descname">intermod_table</code><span class="sig-paren">(</span><em>signals</em>, <em>order</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/intermod_library/intermod_library.html#intermod_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#intermod_library.intermod_library.intermod_table" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">intermod_library.intermod_library.</code><code class="descname">intermod_table</code><span class="sig-paren">(</span><em>signals</em>, <em>order</em>, <em>maximum_single_order=None</em>, <em>bandwidths=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/intermod_library/intermod_library.html#intermod_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#intermod_library.intermod_library.intermod_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates intermodulation products between the given signals</p>
 <p>Will calculate all intermodulation products that could be potentially
 created between the given signals.  Must specify the highest order of
@@ -214,6 +214,8 @@ intermods.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>signals</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – list of signals to calculate intermod products on</li>
 <li><strong>order</strong> (<em>integer</em>) – highest order of intermod products to calculate</li>
+<li><strong>maximum_single_order</strong> (<em>integer</em>) – the maximum order for a single frequency</li>
+<li><strong>bandwidths</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – bandwidths of the provided signals.</li>
 </ul>
 </td>
 </tr>

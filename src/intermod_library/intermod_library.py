@@ -13,7 +13,7 @@ import itertools
 # import helpers.helper_functions
 
 
-def intermod_table(signals, order):
+def intermod_table(signals, order, maximum_single_order=None, bandwidths=None):
     """Calculates intermodulation products between the given signals
 
     Will calculate all intermodulation products that could be potentially
@@ -21,9 +21,13 @@ def intermod_table(signals, order):
     intermods.
 
     :param signals: list of signals to calculate intermod products on
-    :param order: highest order of intermod products to calculate
     :type signals: list[float]
+    :param order: highest order of intermod products to calculate
     :type order: integer
+    :param maximum_single_order: the maximum order for a single frequency
+    :type maximum_single_order: integer
+    :param bandwidths: bandwidths of the provided signals.
+    :type bandwidths: list[float]
     :returns: pandas dataframe containing the calculated intermod products
     :Example:
 
@@ -83,9 +87,14 @@ def intermod_table(signals, order):
 
     # finalmat = coefmat * signmat
 
+    if maximum_single_order is None:
+        mso = order
+    else:
+        mso = maximum_single_order
+
     finalmat = np.array(
         list(
-            itertools.product(range(-1*order, order + 1, 1), repeat=M)
+            itertools.product(range(-1*mso, mso + 1, 1), repeat=M)
         )
     )
 
@@ -106,6 +115,12 @@ def intermod_table(signals, order):
     T.drop_duplicates(inplace=True)
     T.sort_values(by=['Frequency'], inplace=True)
     T.reset_index(drop=True, inplace=True)
+
+    def find_bw(row, bws):
+        return max(row[1:-1]*bws)
+
+    if bandwidths is not None:
+        T['bandwidth'] = T.apply(find_bw, 1, True, None, ([bandwidths]))
 
     return (T)
 
@@ -279,8 +294,3 @@ def intermod_locate(soi, pivot, order):
     T.reset_index(drop=True, inplace=True)
 
     return (T)
-
-soi = 2227.75
-pivot = 2196.0
-order = 7
-table = intermod_locate(soi, pivot, order)
