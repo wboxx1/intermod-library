@@ -92,29 +92,87 @@ def intermod_table(signals, order, maximum_single_order=None, bandwidths=None):
     else:
         mso = maximum_single_order
 
-    finalmat = np.array(
-        list(
-            itertools.product(range(-1*mso, mso + 1, 1), repeat=M)
-        )
-    )
+    # finalmat = np.array(
+    #     list(
+    #         itertools.product(range(-1*mso, mso + 1, 1), repeat=M)
+    #     )
+    # )
 
-    intermods = np.dot(finalmat, signals)
-    intermod_order = np.sum(abs(finalmat), 1)
-    final = np.column_stack((intermods, finalmat, intermod_order))
+    intermods = np.empty
+    tx_indexes = np.empty
+    coefficients = np.empty
 
-    header = ['Frequency']
-    for i in np.arange(M):
-        header = header + ['Signal ' + str(i+1)]
+    columns = ["Frequency", "coefficients", "tx_indexes", "intermod_order"]
+    T = pd.DataFrame(columns=columns)
 
-    header = header + ['Order']
+    coefficients = [x for x in range(-order+1, order) if x != 0]
 
-    T = pd.DataFrame(final, columns=header)
+    for i in range(2, order+1):
+        cart_prod = list(itertools.product(coefficients, repeat=i))
+        filtered = list(filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod))
+        indxs = range(len(signals))
+        idx_combs = list(itertools.combinations(indxs, i))
+
+        intermods = []
+        final_sigs = []
+        final_idxs = []
+        final_coefs = []
+        final_order = []
+        for idxs in idx_combs:
+            for coefs in filtered:
+                sigs = [signals[x] for x in idxs]
+                intermods = [*intermods, np.dot(np.array(sigs), np.array(coefs))]
+                final_sigs = [*final_sigs, sigs]
+                final_idxs = [*final_idxs, idxs]
+                final_coefs = [*final_coefs, coefs]
+                final_order = [*final_order, np.sum([abs(x) for x in coefs])]
+
+        df = pd.DataFrame({"Frequency": intermods, "tx_indexes": final_idxs, "coefficients": final_coefs, "intermod_order": final_order})
+        T = pd.concat([T, df], ignore_index=True)
+
+
+    # combs = list(itertools.combinations(range(len(freqs)), order))
+    # for comb in combs:
+    #     fun = lambda x: (sum(map(abs,x)) <= order) & (abs(sum(x)) > 1) & (np.count_nonzero(x) > 1)
+    #     coef_mat = list(filter(fun, itertools.product(range(-1*mso, mso + 1, 1), repeat=order)))
+    #     foi = [freqs[x] for x in comb]
+    #     intermods = np.dot(coef_mat, foi)
+    #     coefficients =  [x[0] for x in coef_mat]
+    #     tx_indexes = list(itertools.repeat(comb, len(coef_mat)))
+    #     intermod_order = np.sum(abs(np.array(coef_mat)), 1)
+    #     # final = np.column_stack((intermods, coefficients, tx_indexes, intermod_order))
+    #     final = {"Frequency": intermods, "tx_indexes": tx_indexes, "coefficients": coef_mat, "intermod_order": intermod_order}
+    #     test = pd.DataFrame(final)
+    #     df = pd.concat([df, test], ignore_index=True)
+
+    print(T)
 
     T.query('Frequency > 0', inplace=True)
-    T.query('(Order > 0) & (Order <= @order)', inplace=True)
+    # df.query('(Order > 0) & (Order <= @order)', inplace=True)
     T.drop_duplicates(inplace=True)
     T.sort_values(by=['Frequency'], inplace=True)
     T.reset_index(drop=True, inplace=True)
+
+    # print(df.head)
+    # finalmat = list(itertools.product(range(-1*mso, mso + 1, 1), repeat=M))
+
+    # intermods = np.dot(finalmat, signals)
+    # intermod_order = np.sum(abs(finalmat), 1)
+    # final = np.column_stack((intermods, finalmat, intermod_order))
+
+    # header = ['Frequency']
+    # for i in np.arange(M):
+    #     header = header + ['Signal ' + str(i+1)]
+
+    # header = header + ['Order']
+
+    # T = pd.DataFrame(final, columns=header)
+
+    # T.query('Frequency > 0', inplace=True)
+    # T.query('(Order > 0) & (Order <= @order)', inplace=True)
+    # T.drop_duplicates(inplace=True)
+    # T.sort_values(by=['Frequency'], inplace=True)
+    # T.reset_index(drop=True, inplace=True)
 
     def find_bw(row, bws):
         return max(row[1:-1]*bws)
@@ -294,3 +352,8 @@ def intermod_locate(soi, pivot, order):
     T.reset_index(drop=True, inplace=True)
 
     return (T)
+
+
+txrs = pd.read_csv("C:\\Users\\SCYM\\OneDrive\Documents\\Temp\cosite-study\\luke-txrs.csv")
+freqs = txrs.rf
+intermod_table = intermod_table(freqs, 5)
