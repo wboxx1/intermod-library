@@ -11,7 +11,7 @@ def test_intermod_table():
     signals = [1000, 2000]
     order = 3
     table = it.intermod_table(signals, order)
-    assert table.Frequency.sum() == 34000.0
+    assert table.frequency.sum() == 16000.0
 
 
 def test_harmonic_toi():
