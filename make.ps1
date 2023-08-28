@@ -28,7 +28,7 @@ for line in sys.stdin:
 
 function help() {
     Get-Help -Name "make"
-#	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+    #	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 }
 
 <#
@@ -43,7 +43,7 @@ function make($command) {
 .Description
 Remove all build, test, coverage and Python artifacts
 #>
-function clean() {
+function _clean() {
     cleanBuild
     cleanPyc
     cleanTest
@@ -56,8 +56,7 @@ Remove build artifacts
 function cleanBuild() {
     $paths = @(".\build", ".\dist", ".\.eggs", ".\*.egg-info", ".\*.egg")
     foreach ($path in $paths) {
-        if (Test-Path $path) 
-        {
+        if (Test-Path $path) {
             Remove-Item $path -Recurse
         }
     }
@@ -70,8 +69,7 @@ Remove Python file artifacts
 function cleanPyc() {
     $paths = @(".\*.pyc", ".\*.pyc", ".\*.pyo", ".\*~", ".\__pycache__")
     foreach ($path in $paths) {
-        if (Test-Path $path)
-        {
+        if (Test-Path $path) {
             Remove-Item $path -Recurse
         }
     }
@@ -84,8 +82,7 @@ Remove test and coverage artifacts
 function cleanTest() {
     $paths = @(".\.tox", ".\.coverage", ".\.htmlcov", ".\.pytest_cache")
     foreach ($path in $paths) {
-        if (Test-Path $path)
-        {
+        if (Test-Path $path) {
             Remove-Item $path -Recurse
         }
     }
@@ -134,7 +131,7 @@ function coverage() {
 <#
 Generate Sphinx HTML documentation, including API docs
 #>
-function docs(){
+function docs() {
     if (Test-Path ".\docs\intermod_library.rst") { Remove-Item ".\docs\intermod_library.rst" -Force }
     if (Test-Path ".\docs\modules.rst") { Remove-Item ".\docs\modules.rst" -Force }
     poetry run sphinx-apidoc -o docs\ src\intermod_library
@@ -164,7 +161,7 @@ function release() {
 Builds source and wheel package
 #>
 function dist() {
-    clean
+    _clean
     poetry build
 }
 
@@ -172,7 +169,7 @@ function dist() {
 Install the package to the active Python's site-packages
 #>
 function install() {
-    clean
+    _clean
     poetry install
 }
 
