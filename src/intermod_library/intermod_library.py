@@ -37,150 +37,73 @@ def intermod_table(signals, order, maximum_single_order=None, bandwidths=None):
     >>> table = il.intermod_table(signals, order)
     >>> table.head()
 
-    ========= ========= ========= ========= =========
-    <index>   Frequency Signal 1  Signal 2  Order
-    ========= ========= ========= ========= =========
-    0         1000.0    1.0       0.0       1.0
-    1         1000.0    -1.0      1.0       2.0
-    2         2000.0    0.0       1.0       1.0
-    3         2000.0    2.0       0.0       2.0
-    4         3000.0    1.0       1.0       2.0
-    ========= ========= ========= ========= =========
+    ============ ============ ============ ============ ============
+    <index>      Frequency    coefficients tx_indexes   Order
+    ============ ============ ============ ============ ============
+    0            1000.0       (-1, 1)      (0, 1)       1
+    1            3000.0       (-1, 2)      (0, 1)       2
+    2            3000.0       (1, 1)       (0, 1)       1
+    3            4000.0       (2, 1)       (0, 1)       2
+    4            5000.0       (1, 2)       (0, 1)       2
+    ============ ============ ============ ============ ============
     """
 
     M = np.size(signals)   # Number of signals
-    # N = order + 1
 
-    # A = np.arange(0, N)
+    if M < 2:
+        print("Number of signals must be 2 or greater.")
+        return None
 
-    # coefmat = np.zeros([N**M, M])
-
-    # ind = 0
-
-    # for i in range(M, 0, -1):
-    #     m = N**(M-i)
-    #     B = np.ones([N**(i-1), m])
-    #     C = np.kron(B, A)
-    #     coefmat[:, ind] = C.T.ravel()
-    #     ind += 1
-
-    # B = np.ones(2**M)
-    # coefmat = np.reshape(np.kron(B, coefmat), [-1, M])
-
-    # # Make sign array
-    # A = np.array([1, -1])
-    # signmat = np.zeros([2**M, M])
-    # ind = 0
-
-    # for i in range(M, 0, -1):
-    #     m = 2**(M-i)
-    #     B = np.ones([2**(i - 1), m])
-    #     C = np.kron(B, A)
-    #     signmat[:, ind] = C.T.ravel()
-    #     ind += 1
-
-    # j = np.size(coefmat)/M
-    # firstblock = signmat
-
-    # for i in range(1, int(j / 2**M)):
-    #     signmat = np.vstack([signmat, firstblock])
-
-    # finalmat = coefmat * signmat
-
-    if maximum_single_order is None:
-        mso = order
-    else:
-        mso = maximum_single_order
-
-    # finalmat = np.array(
-    #     list(
-    #         itertools.product(range(-1*mso, mso + 1, 1), repeat=M)
-    #     )
-    # )
-
-    intermods = np.empty
-    tx_indexes = np.empty
-    coefficients = np.empty
-
-    columns = ["Frequency", "coefficients", "tx_indexes", "intermod_order"]
+    columns = ["frequency", "coefficients", "tx_indexes", "intermod_order"]
     T = pd.DataFrame(columns=columns)
 
     coefficients = [x for x in range(-order+1, order) if x != 0]
 
-    for i in range(2, order+1):
-        cart_prod = list(itertools.product(coefficients, repeat=i))
-        filtered = list(filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod))
-        indxs = range(len(signals))
-        idx_combs = list(itertools.combinations(indxs, i))
+    num_of_sigs_to_combine = [2, 3] if M > 2 else [2]
 
-        intermods = []
-        final_sigs = []
-        final_idxs = []
-        final_coefs = []
-        final_order = []
-        for idxs in idx_combs:
-            for coefs in filtered:
-                sigs = [signals[x] for x in idxs]
-                intermods = [*intermods, np.dot(np.array(sigs), np.array(coefs))]
-                final_sigs = [*final_sigs, sigs]
-                final_idxs = [*final_idxs, idxs]
-                final_coefs = [*final_coefs, coefs]
-                final_order = [*final_order, np.sum([abs(x) for x in coefs])]
+    for i in num_of_sigs_to_combine:
+        cart_prod = itertools.product(coefficients, repeat=i)
+        coef_list = list(
+            filter(
+                lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod
+            )
+        )
+        coef_array = np.array(coef_list)
+        coef_tuple_array = pd.Index(coef_list).values
+        idx_combs = pd.Index(list(itertools.combinations(range(M), i))).values
 
-        df = pd.DataFrame({"Frequency": intermods, "tx_indexes": final_idxs, "coefficients": final_coefs, "intermod_order": final_order})
+        if i == 2:
+            sigs = [[signals[x], signals[y]] for x, y in idx_combs]
+            intermod_order = [np.sum(abs(np.array(z))) for z in coef_array]
+        else:
+            sigs = [[signals[x], signals[y], signals[z]] for x, y, z in idx_combs]
+            intermod_order = [np.sum(abs(np.array(x))) for x in coef_array]
+
+        intermods = np.dot(coef_array, np.array(sigs, dtype=float).T).flatten(order="C")
+
+        num_repeat = len(idx_combs)
+        num_tile = len(coef_tuple_array)
+
+        final_coefs = np.repeat(coef_tuple_array, num_repeat)
+        final_idxs = np.tile(idx_combs, num_tile)
+
+        final_order = np.repeat(intermod_order, num_repeat)
+
+        df = pd.DataFrame(
+            {
+                "frequency": intermods,
+                "tx_indexes": final_idxs,
+                "coefficients": final_coefs,
+                "intermod_order": final_order
+            }
+        )
         T = pd.concat([T, df], ignore_index=True)
 
-
-    # combs = list(itertools.combinations(range(len(freqs)), order))
-    # for comb in combs:
-    #     fun = lambda x: (sum(map(abs,x)) <= order) & (abs(sum(x)) > 1) & (np.count_nonzero(x) > 1)
-    #     coef_mat = list(filter(fun, itertools.product(range(-1*mso, mso + 1, 1), repeat=order)))
-    #     foi = [freqs[x] for x in comb]
-    #     intermods = np.dot(coef_mat, foi)
-    #     coefficients =  [x[0] for x in coef_mat]
-    #     tx_indexes = list(itertools.repeat(comb, len(coef_mat)))
-    #     intermod_order = np.sum(abs(np.array(coef_mat)), 1)
-    #     # final = np.column_stack((intermods, coefficients, tx_indexes, intermod_order))
-    #     final = {"Frequency": intermods, "tx_indexes": tx_indexes, "coefficients": coef_mat, "intermod_order": intermod_order}
-    #     test = pd.DataFrame(final)
-    #     df = pd.concat([df, test], ignore_index=True)
-
-    print(T)
-
-    T.query('Frequency > 0', inplace=True)
-    # df.query('(Order > 0) & (Order <= @order)', inplace=True)
+    T.query('frequency > 0.01', inplace=True)
     T.drop_duplicates(inplace=True)
-    T.sort_values(by=['Frequency'], inplace=True)
+    T.sort_values(by=['frequency'], inplace=True)
     T.reset_index(drop=True, inplace=True)
-
-    # print(df.head)
-    # finalmat = list(itertools.product(range(-1*mso, mso + 1, 1), repeat=M))
-
-    # intermods = np.dot(finalmat, signals)
-    # intermod_order = np.sum(abs(finalmat), 1)
-    # final = np.column_stack((intermods, finalmat, intermod_order))
-
-    # header = ['Frequency']
-    # for i in np.arange(M):
-    #     header = header + ['Signal ' + str(i+1)]
-
-    # header = header + ['Order']
-
-    # T = pd.DataFrame(final, columns=header)
-
-    # T.query('Frequency > 0', inplace=True)
-    # T.query('(Order > 0) & (Order <= @order)', inplace=True)
-    # T.drop_duplicates(inplace=True)
-    # T.sort_values(by=['Frequency'], inplace=True)
-    # T.reset_index(drop=True, inplace=True)
-
-    def find_bw(row, bws):
-        return max(row[1:-1]*bws)
-
-    if bandwidths is not None:
-        T['bandwidth'] = T.apply(find_bw, 1, True, None, ([bandwidths]))
-
-    return (T)
+    return T
 
 
 def harmonic_toi(frqs, order, band_of_interest=[]):
@@ -352,8 +275,3 @@ def intermod_locate(soi, pivot, order):
     T.reset_index(drop=True, inplace=True)
 
     return (T)
-
-
-txrs = pd.read_csv("C:\\Users\\SCYM\\OneDrive\Documents\\Temp\cosite-study\\luke-txrs.csv")
-freqs = txrs.rf
-intermod_table = intermod_table(freqs, 5)
