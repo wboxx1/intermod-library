@@ -35,7 +35,7 @@ stack: python %PYTHON%
 
 install:
   - cmd: "%PYTHON%/Scripts/easy_install -U pip"
-  - cmd: "%PYTHON%/Scripts/pip install --upgrade pip setuptools wheel"
+  - cmd: "%PYTHON%/python -m pip install --upgrade pip"
   - cmd: "%PYTHON%/Scripts/pip install tox"
   - cmd: "%PYTHON%/Scripts/pip install poetry"
   - sh: "pip install -U tox"
