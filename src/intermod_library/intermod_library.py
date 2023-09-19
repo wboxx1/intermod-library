@@ -10,10 +10,47 @@ Intermod Tools
 import numpy as np
 import pandas as pd
 import itertools
+from numba import njit
 # import helpers.helper_functions
 
 
-def intermod_table(signals, order, maximum_single_order=None, bandwidths=None):
+@njit
+def _cond_nb(x, j, k):
+    return (x > j) & (x < k)
+
+
+@njit
+def _filter2_nb(arr, lower_limit, upper_limit):
+    j = 0
+    for i in range(arr.size):
+        if _cond_nb(arr[i], lower_limit, upper_limit):
+            j += 1
+    result = np.empty(j, dtype=arr.dtype)
+    idx_list = np.empty(j, dtype=np.int32)
+    j = 0
+    for i in range(arr.size):
+        if _cond_nb(arr[i], lower_limit, upper_limit):
+            result[j] = arr[i]
+            idx_list[j] = i
+            j += 1
+    return result, idx_list
+
+
+def _filter_from_list(arr, indexes):
+    result = np.empty(len(indexes), dtype=arr.dtype)
+    for i, v in enumerate(indexes):
+        result[i] = arr[v]
+    return result
+
+
+def get_intermod_table(
+        signals,
+        order,
+        lower_limit,
+        upper_limit,
+        maximum_single_order=None,
+        bandwidths=None
+):
     """Calculates intermodulation products between the given signals
 
     Will calculate all intermodulation products that could be potentially
@@ -24,28 +61,49 @@ def intermod_table(signals, order, maximum_single_order=None, bandwidths=None):
     :type signals: list[float]
     :param order: highest order of intermod products to calculate
     :type order: integer
+    :param lower_limit: lower frequency limit in MHz to filter intemod list above
+    :type lower_limit: integer
+    :param upper_limit: upper frequency limit in MHz to filter intemod list below
+    :type upper_limit: integer
     :param maximum_single_order: the maximum order for a single frequency
     :type maximum_single_order: integer
     :param bandwidths: bandwidths of the provided signals.
     :type bandwidths: list[float]
-    :returns: pandas dataframe containing the calculated intermod products
+    :returns: tuple of lists (freqs, tx_indexes, coeff_tuples, order_tuples)
     :Example:
 
     >>> import intermod_library.intermod_library as il
     >>> signals = [1000, 2000]
     >>> order = 3
-    >>> table = il.intermod_table(signals, order)
-    >>> table.head()
+    >>> freqs, tx_indexes, coeff_tuples, order_tuples = il.intermod_table(signals, order, lower_limit=0, upper_limit=100e3)
+    >>> table = (
+            pl.DataFrame(
+                {
+                    "frequency": freqs,
+                    "coefficients": coeff_tuples,
+                    "tx_indexes": tx_indexes, 
+                    "intermod_order": order_tuples
+                }
+            )
+            .lazy()
+            .unique(
+                subset=["frequency", "tx_indexes", "coefficients"]
+            )
+            .sort(
+                by=["frequency", "intermod_order"]
+            )
+        )
+    >>> table.collect()
 
-    ============ ============ ============ ============ ============
-    <index>      Frequency    coefficients tx_indexes   Order
-    ============ ============ ============ ============ ============
-    0            1000.0       (-1, 1)      (0, 1)       1
-    1            3000.0       (-1, 2)      (0, 1)       2
-    2            3000.0       (1, 1)       (0, 1)       1
-    3            4000.0       (2, 1)       (0, 1)       2
-    4            5000.0       (1, 2)       (0, 1)       2
-    ============ ============ ============ ============ ============
+    ============ ============ ============ ==============
+    frequency    coefficients tx_indexes   intermod_order
+    ============ ============ ============ ==============
+    1000.0       (-1, 1)      (0, 1)       2
+    3000.0       (1, 1)       (0, 1)       2
+    3000.0       (-1, 2)      (0, 1)       3
+    4000.0       (2, 1)       (0, 1)       3
+    5000.0       (1, 2)       (0, 1)       3
+    ============ ============ ============ ==============
     """
 
     M = np.size(signals)   # Number of signals
@@ -54,56 +112,89 @@ def intermod_table(signals, order, maximum_single_order=None, bandwidths=None):
         print("Number of signals must be 2 or greater.")
         return None
 
-    columns = ["frequency", "coefficients", "tx_indexes", "intermod_order"]
-    T = pd.DataFrame(columns=columns)
+    if maximum_single_order is None:
+        mso = order
+    else:
+        mso = maximum_single_order
 
     coefficients = [x for x in range(-order+1, order) if x != 0]
 
-    num_of_sigs_to_combine = [2, 3] if M > 2 else [2]
+    # First determine size of arrays
 
-    for i in num_of_sigs_to_combine:
-        cart_prod = itertools.product(coefficients, repeat=i)
+    # First for pairs of 2
+    v = 2
+    cart_prod = itertools.product(coefficients, repeat=v)
+    coef_list = list(
+        filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod)
+    )
+    coef_array = np.array(coef_list)
+    coef_tuple_array = np.array(coef_list, dtype="i,i").astype(object)
+    idx_combs = np.array(
+        list(itertools.combinations(range(M), v)), dtype="i,i"
+    ).astype(object)
+
+    sigs = [[signals[x], signals[y]] for x, y in idx_combs] 
+    intermod_order = [np.sum(abs(np.array(z))) for z in coef_array]
+
+    intermods = np.matmul(coef_array, np.array(sigs, dtype=float).T).flatten(order="C")
+
+    num_repeat = len(idx_combs)
+    num_tile = len(coef_tuple_array)
+
+    final_coefs = np.repeat(coef_tuple_array, num_repeat)
+    final_idxs = np.tile(idx_combs, num_tile)
+    final_order = np.repeat(intermod_order, num_repeat)
+
+    # Finished product below this
+    freqs = intermods
+    tx_indexes = final_idxs
+    coeff_tuples = final_coefs
+    order_tuples = final_order
+
+    # If necessary, do for pairs of 3
+    if M > 2:
+        v = 3
+        cart_prod = itertools.product(coefficients, repeat=v)
         coef_list = list(
-            filter(
-                lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod
-            )
+            filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod)
         )
         coef_array = np.array(coef_list)
-        coef_tuple_array = pd.Index(coef_list).values
-        idx_combs = pd.Index(list(itertools.combinations(range(M), i))).values
+        coef_tuple_array = np.array(coef_list, dtype="i,i,i").astype(object)
+        idx_combs = np.array(
+            list(itertools.combinations(range(M), v)), dtype="i,i,i"
+        ).astype(object)
 
-        if i == 2:
-            sigs = [[signals[x], signals[y]] for x, y in idx_combs]
-            intermod_order = [np.sum(abs(np.array(z))) for z in coef_array]
-        else:
-            sigs = [[signals[x], signals[y], signals[z]] for x, y, z in idx_combs]
-            intermod_order = [np.sum(abs(np.array(x))) for x in coef_array]
+        sigs = [[signals[x], signals[y], signals[z]] for x,y,z in idx_combs]
+        intermod_order = [np.sum(abs(np.array(x))) for x in coef_array]
 
-        intermods = np.dot(coef_array, np.array(sigs, dtype=float).T).flatten(order="C")
+        intermods = np.matmul(
+            coef_array,
+            np.array(sigs, dtype=float).T
+        ).flatten(order="c")
 
         num_repeat = len(idx_combs)
         num_tile = len(coef_tuple_array)
 
         final_coefs = np.repeat(coef_tuple_array, num_repeat)
         final_idxs = np.tile(idx_combs, num_tile)
-
         final_order = np.repeat(intermod_order, num_repeat)
 
-        df = pd.DataFrame(
-            {
-                "frequency": intermods,
-                "tx_indexes": final_idxs,
-                "coefficients": final_coefs,
-                "intermod_order": final_order
-            }
-        )
-        T = pd.concat([T, df], ignore_index=True)
+        # Finished product below this
+        freqs = np.concatenate((freqs, intermods), axis=0)
+        tx_indexes = np.concatenate((tx_indexes, final_idxs), axis=0)
+        coeff_tuples = np.concatenate((coeff_tuples, final_coefs), axis=0)
+        order_tuples = np.concatenate((order_tuples, final_order), axis=0)
 
-    T.query('frequency > 0.01', inplace=True)
-    T.drop_duplicates(inplace=True)
-    T.sort_values(by=['frequency'], inplace=True)
-    T.reset_index(drop=True, inplace=True)
-    return T
+    filtered_freqs, idx_list = _filter2_nb(freqs, lower_limit, upper_limit)
+    filtered_tx_indexes = tx_indexes[idx_list]
+    filtered_coeff_tuples = coeff_tuples[idx_list]
+    filtered_order_tuples = order_tuples[idx_list]
+    return (
+        filtered_freqs,
+        filtered_tx_indexes,
+        filtered_coeff_tuples,
+        filtered_order_tuples
+    )
 
 
 def harmonic_toi(frqs, order, band_of_interest=[]):

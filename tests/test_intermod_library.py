@@ -10,8 +10,15 @@ import intermod_library.intermod_library as it
 def test_intermod_table():
     signals = [1000, 2000]
     order = 3
-    table = it.intermod_table(signals, order)
-    assert table.frequency.sum() == 16000.0
+    lower_limit = 0
+    upper_limit = 100e3
+    (
+        freqs,
+        tx_indexes,
+        coeff_tuples,
+        order_tuples
+    ) = it.intermod_table(signals, order, lower_limit, upper_limit)
+    assert freqs.sum() == 16000.0
 
 
 def test_harmonic_toi():
