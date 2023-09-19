@@ -43,7 +43,7 @@ def _filter_from_list(arr, indexes):
     return result
 
 
-def get_intermod_table(
+def intermod_table(
         signals,
         order,
         lower_limit,
