@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>intermod_library.intermod_library &#8212; intermod-library 0.6.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/nature.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>intermod_library.intermod_library &#8212; intermod-library 0.8.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nature.css?v=8fc2db88" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=6a14807c"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
   </head><body>
@@ -23,7 +22,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">intermod-library 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">intermod-library 0.8.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">intermod_library.intermod_library</a></li> 
       </ul>
@@ -43,14 +42,47 @@
 <span class="sd">@author: William Boxx</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">itertools</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>
+
 <span class="c1"># import helpers.helper_functions</span>
 
 
-<div class="viewcode-block" id="intermod_table"><a class="viewcode-back" href="../../intermod_library.html#intermod_library.intermod_library.intermod_table">[docs]</a><span class="k">def</span> <span class="nf">intermod_table</span><span class="p">(</span><span class="n">signals</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">maximum_single_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bandwidths</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_cond_nb</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">j</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">)</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_filter2_nb</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">):</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_cond_nb</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">):</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">idx_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_cond_nb</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">):</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">idx_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">idx_list</span>
+
+
+<span class="k">def</span> <span class="nf">_filter_from_list</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">indexes</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indexes</span><span class="p">):</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="intermod_table"><a class="viewcode-back" href="../../intermod_library.html#intermod_library.intermod_library.intermod_table">[docs]</a><span class="k">def</span> <span class="nf">intermod_table</span><span class="p">(</span>
+    <span class="n">signals</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">,</span> <span class="n">maximum_single_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bandwidths</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates intermodulation products between the given signals</span>
 
 <span class="sd">    Will calculate all intermodulation products that could be potentially</span>
@@ -61,86 +93,136 @@
 <span class="sd">    :type signals: list[float]</span>
 <span class="sd">    :param order: highest order of intermod products to calculate</span>
 <span class="sd">    :type order: integer</span>
+<span class="sd">    :param lower_limit: lower frequency limit in MHz to filter intemod list above</span>
+<span class="sd">    :type lower_limit: integer</span>
+<span class="sd">    :param upper_limit: upper frequency limit in MHz to filter intemod list below</span>
+<span class="sd">    :type upper_limit: integer</span>
 <span class="sd">    :param maximum_single_order: the maximum order for a single frequency</span>
 <span class="sd">    :type maximum_single_order: integer</span>
 <span class="sd">    :param bandwidths: bandwidths of the provided signals.</span>
 <span class="sd">    :type bandwidths: list[float]</span>
-<span class="sd">    :returns: pandas dataframe containing the calculated intermod products</span>
+<span class="sd">    :returns: tuple of lists (freqs, tx_indexes, coeff_tuples, order_tuples)</span>
 <span class="sd">    :Example:</span>
 
 <span class="sd">    &gt;&gt;&gt; import intermod_library.intermod_library as il</span>
 <span class="sd">    &gt;&gt;&gt; signals = [1000, 2000]</span>
 <span class="sd">    &gt;&gt;&gt; order = 3</span>
-<span class="sd">    &gt;&gt;&gt; table = il.intermod_table(signals, order)</span>
-<span class="sd">    &gt;&gt;&gt; table.head()</span>
+<span class="sd">    &gt;&gt;&gt; freqs, tx_indexes, coeff_tuples, order_tuples = il.intermod_table(signals, order, lower_limit=0, upper_limit=100e3)</span>
+<span class="sd">    &gt;&gt;&gt; table = (</span>
+<span class="sd">            pl.DataFrame(</span>
+<span class="sd">                {</span>
+<span class="sd">                    &quot;frequency&quot;: freqs,</span>
+<span class="sd">                    &quot;coefficients&quot;: coeff_tuples,</span>
+<span class="sd">                    &quot;tx_indexes&quot;: tx_indexes,</span>
+<span class="sd">                    &quot;intermod_order&quot;: order_tuples</span>
+<span class="sd">                }</span>
+<span class="sd">            )</span>
+<span class="sd">            .lazy()</span>
+<span class="sd">            .unique(</span>
+<span class="sd">                subset=[&quot;frequency&quot;, &quot;tx_indexes&quot;, &quot;coefficients&quot;]</span>
+<span class="sd">            )</span>
+<span class="sd">            .sort(</span>
+<span class="sd">                by=[&quot;frequency&quot;, &quot;intermod_order&quot;]</span>
+<span class="sd">            )</span>
+<span class="sd">        )</span>
+<span class="sd">    &gt;&gt;&gt; table.collect()</span>
 
-<span class="sd">    ============ ============ ============ ============ ============</span>
-<span class="sd">    &lt;index&gt;      Frequency    coefficients tx_indexes   Order</span>
-<span class="sd">    ============ ============ ============ ============ ============</span>
-<span class="sd">    0            1000.0       (-1, 1)      (0, 1)       1</span>
-<span class="sd">    1            3000.0       (-1, 2)      (0, 1)       2</span>
-<span class="sd">    2            3000.0       (1, 1)       (0, 1)       1</span>
-<span class="sd">    3            4000.0       (2, 1)       (0, 1)       2</span>
-<span class="sd">    4            5000.0       (1, 2)       (0, 1)       2</span>
-<span class="sd">    ============ ============ ============ ============ ============</span>
+<span class="sd">    ============ ============ ============ ==============</span>
+<span class="sd">    frequency    coefficients tx_indexes   intermod_order</span>
+<span class="sd">    ============ ============ ============ ==============</span>
+<span class="sd">    1000.0       (-1, 1)      (0, 1)       2</span>
+<span class="sd">    3000.0       (1, 1)       (0, 1)       2</span>
+<span class="sd">    3000.0       (-1, 2)      (0, 1)       3</span>
+<span class="sd">    4000.0       (2, 1)       (0, 1)       3</span>
+<span class="sd">    5000.0       (1, 2)       (0, 1)       3</span>
+<span class="sd">    ============ ============ ============ ==============</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>   <span class="c1"># Number of signals</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>  <span class="c1"># Number of signals</span>
 
     <span class="k">if</span> <span class="n">M</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of signals must be 2 or greater.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;coefficients&quot;</span><span class="p">,</span> <span class="s2">&quot;tx_indexes&quot;</span><span class="p">,</span> <span class="s2">&quot;intermod_order&quot;</span><span class="p">]</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maximum_single_order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mso</span> <span class="o">=</span> <span class="n">order</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mso</span> <span class="o">=</span> <span class="n">maximum_single_order</span>
 
-    <span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">num_of_sigs_to_combine</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="n">M</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="c1"># First determine size of arrays</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">num_of_sigs_to_combine</span><span class="p">:</span>
-        <span class="n">cart_prod</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+    <span class="c1"># First for pairs of 2</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">cart_prod</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">coef_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span> <span class="o">&lt;=</span> <span class="n">order</span><span class="p">,</span> <span class="n">cart_prod</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">coef_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coef_list</span><span class="p">)</span>
+    <span class="n">coef_tuple_array</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">coef_list</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">idx_combs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="n">v</span><span class="p">)))</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="n">sigs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">signals</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">signals</span><span class="p">[</span><span class="n">y</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">idx_combs</span><span class="p">]</span>
+    <span class="n">intermod_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">coef_array</span><span class="p">]</span>
+
+    <span class="n">intermods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">coef_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+
+    <span class="n">num_repeat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_combs</span><span class="p">)</span>
+    <span class="n">num_tile</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coef_tuple_array</span><span class="p">)</span>
+
+    <span class="n">final_coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">coef_tuple_array</span><span class="p">,</span> <span class="n">num_repeat</span><span class="p">)</span>
+    <span class="n">final_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">idx_combs</span><span class="p">,</span> <span class="n">num_tile</span><span class="p">)</span>
+    <span class="n">final_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">intermod_order</span><span class="p">,</span> <span class="n">num_repeat</span><span class="p">)</span>
+
+    <span class="c1"># Finished product below this</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">intermods</span>
+    <span class="n">tx_indexes</span> <span class="o">=</span> <span class="n">final_idxs</span>
+    <span class="n">coeff_tuples</span> <span class="o">=</span> <span class="n">final_coefs</span>
+    <span class="n">order_tuples</span> <span class="o">=</span> <span class="n">final_order</span>
+
+    <span class="c1"># If necessary, do for pairs of 3</span>
+    <span class="k">if</span> <span class="n">M</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">cart_prod</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
         <span class="n">coef_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">filter</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span> <span class="o">&lt;=</span> <span class="n">order</span><span class="p">,</span> <span class="n">cart_prod</span>
-            <span class="p">)</span>
+            <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span> <span class="o">&lt;=</span> <span class="n">order</span><span class="p">,</span> <span class="n">cart_prod</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">coef_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coef_list</span><span class="p">)</span>
         <span class="n">coef_tuple_array</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">coef_list</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">idx_combs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="n">i</span><span class="p">)))</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># filtrd_coefficients = pd.Index(list(filter(lambda x: np.sum([abs(y) for y in np.array(x)]) &lt;= order, cart_prod))).values</span>
+        <span class="n">idx_combs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="n">v</span><span class="p">)))</span><span class="o">.</span><span class="n">values</span>
 
-        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">sigs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">signals</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">signals</span><span class="p">[</span><span class="n">y</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">idx_combs</span><span class="p">]</span>
-            <span class="n">intermod_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">coef_array</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">sigs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">signals</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">signals</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">signals</span><span class="p">[</span><span class="n">z</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">idx_combs</span><span class="p">]</span>
-            <span class="n">intermod_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">coef_array</span><span class="p">]</span>
+        <span class="n">sigs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">signals</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">signals</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">signals</span><span class="p">[</span><span class="n">z</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">idx_combs</span><span class="p">]</span>
+        <span class="n">intermod_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">coef_array</span><span class="p">]</span>
 
-        <span class="n">intermods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+        <span class="n">intermods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">coef_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span>
+            <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span>
+        <span class="p">)</span>
 
         <span class="n">num_repeat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_combs</span><span class="p">)</span>
         <span class="n">num_tile</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coef_tuple_array</span><span class="p">)</span>
 
         <span class="n">final_coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">coef_tuple_array</span><span class="p">,</span> <span class="n">num_repeat</span><span class="p">)</span>
         <span class="n">final_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">idx_combs</span><span class="p">,</span> <span class="n">num_tile</span><span class="p">)</span>
-
         <span class="n">final_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">intermod_order</span><span class="p">,</span> <span class="n">num_repeat</span><span class="p">)</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="n">intermods</span><span class="p">,</span>
-                <span class="s2">&quot;tx_indexes&quot;</span><span class="p">:</span> <span class="n">final_idxs</span><span class="p">,</span>
-                <span class="s2">&quot;coefficients&quot;</span><span class="p">:</span> <span class="n">final_coefs</span><span class="p">,</span>
-                <span class="s2">&quot;intermod_order&quot;</span><span class="p">:</span> <span class="n">final_order</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-        <span class="n">T</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">T</span><span class="p">,</span> <span class="n">df</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Finished product below this</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">freqs</span><span class="p">,</span> <span class="n">intermods</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tx_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">tx_indexes</span><span class="p">,</span> <span class="n">final_idxs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">coeff_tuples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">coeff_tuples</span><span class="p">,</span> <span class="n">final_coefs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">order_tuples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">order_tuples</span><span class="p">,</span> <span class="n">final_order</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;frequency &gt; 0.01&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">T</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">T</span></div>
+    <span class="n">filtered_freqs</span><span class="p">,</span> <span class="n">idx_list</span> <span class="o">=</span> <span class="n">_filter2_nb</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">)</span>
+    <span class="n">filtered_tx_indexes</span> <span class="o">=</span> <span class="n">tx_indexes</span><span class="p">[</span><span class="n">idx_list</span><span class="p">]</span>
+    <span class="n">filtered_coeff_tuples</span> <span class="o">=</span> <span class="n">coeff_tuples</span><span class="p">[</span><span class="n">idx_list</span><span class="p">]</span>
+    <span class="n">filtered_order_tuples</span> <span class="o">=</span> <span class="n">order_tuples</span><span class="p">[</span><span class="n">idx_list</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">filtered_freqs</span><span class="p">,</span>
+        <span class="n">filtered_tx_indexes</span><span class="p">,</span>
+        <span class="n">filtered_coeff_tuples</span><span class="p">,</span>
+        <span class="n">filtered_order_tuples</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="harmonic_toi"><a class="viewcode-back" href="../../intermod_library.html#intermod_library.intermod_library.harmonic_toi">[docs]</a><span class="k">def</span> <span class="nf">harmonic_toi</span><span class="p">(</span><span class="n">frqs</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">band_of_interest</span><span class="o">=</span><span class="p">[]):</span>
@@ -191,16 +273,16 @@
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
         <span class="n">table</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">frqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">table</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">frqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">table</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">frqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
-    <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Harmonic #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
-    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Signal &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Harmonic #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Signal &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
     <span class="n">T</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lower</span> <span class="ow">and</span> <span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lower</span> <span class="ow">and</span> <span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">:</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;**&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
@@ -241,7 +323,7 @@
 <span class="sd">    ========= ========= ========= ========= =========</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># Number of signals</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Number of signals</span>
     <span class="c1"># N = order + 1</span>
 
     <span class="c1"># A = np.arange(0, N)</span>
@@ -281,9 +363,7 @@
     <span class="c1"># finalmat = coefmat * signmat</span>
 
     <span class="n">finalmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-        <span class="nb">list</span><span class="p">(</span>
-            <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">order</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">order</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">M</span><span class="p">))</span>
     <span class="p">)</span>
 
     <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
@@ -297,21 +377,21 @@
     <span class="n">intermod_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">finalmat</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">final</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="n">finalmat</span><span class="p">,</span> <span class="n">intermod_order</span><span class="p">))</span>
 
-    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Frequency&quot;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Signal &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;Signal &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
-    <span class="n">header</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Order&#39;</span><span class="p">]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;Order&quot;</span><span class="p">]</span>
 
     <span class="n">T</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">final</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
 
-    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Frequency &gt; 0 &amp; Frequency &lt; inf&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;(Order &gt; 0) &amp; (Order &lt;= @order)&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Frequency &gt; 0 &amp; Frequency &lt; inf&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;(Order &gt; 0) &amp; (Order &lt;= @order)&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">T</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Frequency&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">T</span></div>
 </pre></div>
 
             <div class="clearer"></div>
@@ -343,14 +423,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">intermod-library 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">intermod-library 0.8.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">intermod_library.intermod_library</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2018, Will Boxx.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    &#169; Copyright 2018, Will Boxx.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
     </div>
   </body>
 </html>
