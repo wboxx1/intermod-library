@@ -6,11 +6,12 @@ Intermod Tools
 @author: William Boxx
 """
 
+import itertools
 
 import numpy as np
 import pandas as pd
-import itertools
 from numba import njit
+
 # import helpers.helper_functions
 
 
@@ -44,12 +45,7 @@ def _filter_from_list(arr, indexes):
 
 
 def intermod_table(
-        signals,
-        order,
-        lower_limit,
-        upper_limit,
-        maximum_single_order=None,
-        bandwidths=None
+    signals, order, lower_limit, upper_limit, maximum_single_order=None, bandwidths=None
 ):
     """Calculates intermodulation products between the given signals
 
@@ -81,7 +77,7 @@ def intermod_table(
                 {
                     "frequency": freqs,
                     "coefficients": coeff_tuples,
-                    "tx_indexes": tx_indexes, 
+                    "tx_indexes": tx_indexes,
                     "intermod_order": order_tuples
                 }
             )
@@ -106,7 +102,7 @@ def intermod_table(
     ============ ============ ============ ==============
     """
 
-    M = np.size(signals)   # Number of signals
+    M = np.size(signals)  # Number of signals
 
     if M < 2:
         print("Number of signals must be 2 or greater.")
@@ -117,7 +113,7 @@ def intermod_table(
     else:
         mso = maximum_single_order
 
-    coefficients = [x for x in range(-order+1, order) if x != 0]
+    coefficients = [x for x in range(-order + 1, order) if x != 0]
 
     # First determine size of arrays
 
@@ -128,12 +124,10 @@ def intermod_table(
         filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod)
     )
     coef_array = np.array(coef_list)
-    coef_tuple_array = np.array(coef_list, dtype="i,i").astype(object)
-    idx_combs = np.array(
-        list(itertools.combinations(range(M), v)), dtype="i,i"
-    ).astype(object)
+    coef_tuple_array = pd.Index(coef_list).values
+    idx_combs = pd.Index(list(itertools.combinations(range(M), v))).values
 
-    sigs = [[signals[x], signals[y]] for x, y in idx_combs] 
+    sigs = [[signals[x], signals[y]] for x, y in idx_combs]
     intermod_order = [np.sum(abs(np.array(z))) for z in coef_array]
 
     intermods = np.matmul(coef_array, np.array(sigs, dtype=float).T).flatten(order="C")
@@ -159,18 +153,16 @@ def intermod_table(
             filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod)
         )
         coef_array = np.array(coef_list)
-        coef_tuple_array = np.array(coef_list, dtype="i,i,i").astype(object)
-        idx_combs = np.array(
-            list(itertools.combinations(range(M), v)), dtype="i,i,i"
-        ).astype(object)
+        coef_tuple_array = pd.Index(coef_list).values
+        # filtrd_coefficients = pd.Index(list(filter(lambda x: np.sum([abs(y) for y in np.array(x)]) <= order, cart_prod))).values
+        idx_combs = pd.Index(list(itertools.combinations(range(M), v))).values
 
-        sigs = [[signals[x], signals[y], signals[z]] for x,y,z in idx_combs]
+        sigs = [[signals[x], signals[y], signals[z]] for x, y, z in idx_combs]
         intermod_order = [np.sum(abs(np.array(x))) for x in coef_array]
 
-        intermods = np.matmul(
-            coef_array,
-            np.array(sigs, dtype=float).T
-        ).flatten(order="c")
+        intermods = np.matmul(coef_array, np.array(sigs, dtype=float).T).flatten(
+            order="C"
+        )
 
         num_repeat = len(idx_combs)
         num_tile = len(coef_tuple_array)
@@ -193,7 +185,7 @@ def intermod_table(
         filtered_freqs,
         filtered_tx_indexes,
         filtered_coeff_tuples,
-        filtered_order_tuples
+        filtered_order_tuples,
     )
 
 
@@ -245,16 +237,16 @@ def harmonic_toi(frqs, order, band_of_interest=[]):
 
     for i in np.arange(n):
         table[0, i] = frqs[i]
-        table[1:, i] = [frqs[i]*x for x in np.arange(2, order+1)]
+        table[1:, i] = [frqs[i] * x for x in np.arange(2, order + 1)]
 
-    index = ["Harmonic #" + str(x) for x in range(1, order+1)]
-    header = ["Signal " + str(x) for x in range(1, n+1)]
+    index = ["Harmonic #" + str(x) for x in range(1, order + 1)]
+    header = ["Signal " + str(x) for x in range(1, n + 1)]
 
     T = pd.DataFrame(table, columns=header, index=index)
 
     for i in np.arange(T.shape[0]):
         for j in np.arange(T.shape[1]):
-            if (T.iloc[i, j] >= lower and T.iloc[i, j] <= upper):
+            if T.iloc[i, j] >= lower and T.iloc[i, j] <= upper:
                 T.iloc[i, j] = "**" + str(T.iloc[i, j])
             else:
                 T.iloc[i, j] = str(T.iloc[i, j])
@@ -295,7 +287,7 @@ def intermod_locate(soi, pivot, order):
     ========= ========= ========= ========= =========
     """
 
-    M = 2   # Number of signals
+    M = 2  # Number of signals
     # N = order + 1
 
     # A = np.arange(0, N)
@@ -335,9 +327,7 @@ def intermod_locate(soi, pivot, order):
     # finalmat = coefmat * signmat
 
     finalmat = np.array(
-        list(
-            itertools.product(range(-1*order, order + 1, 1), repeat=M)
-        )
+        list(itertools.product(range(-1 * order, order + 1, 1), repeat=M))
     )
 
     y = []
@@ -351,18 +341,18 @@ def intermod_locate(soi, pivot, order):
     intermod_order = np.sum(abs(finalmat), 1)
     final = np.column_stack((y, finalmat, intermod_order))
 
-    header = ['Frequency']
+    header = ["Frequency"]
     for i in np.arange(M):
-        header = header + ['Signal ' + str(i+1)]
+        header = header + ["Signal " + str(i + 1)]
 
-    header = header + ['Order']
+    header = header + ["Order"]
 
     T = pd.DataFrame(final, columns=header)
 
-    T.query('Frequency > 0 & Frequency < inf', inplace=True)
-    T.query('(Order > 0) & (Order <= @order)', inplace=True)
+    T.query("Frequency > 0 & Frequency < inf", inplace=True)
+    T.query("(Order > 0) & (Order <= @order)", inplace=True)
     T.drop_duplicates(inplace=True)
-    T.sort_values(by=['Frequency'], inplace=True)
+    T.sort_values(by=["Frequency"], inplace=True)
     T.reset_index(drop=True, inplace=True)
 
-    return (T)
+    return T
